@@ -25,7 +25,12 @@ class ServerManager {
             servers.push(pretty);
         });
 
-        this.updateServers(servers);
+        let i, j, temp, chunk = 50;
+        for (i = 0, j = servers.length; i < j; i += chunk) {
+            temp = servers.slice(i, i + chunk);
+            this.updateServers(temp);
+            // do whatever
+        }
     }
 
     updateServers(servers) {
