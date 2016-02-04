@@ -37,8 +37,12 @@ class ServerManager {
         this.api.call('/servers', 'post', {servers: servers}, (error, response, body) => {
             if (error) { console.log("Error Updating: ", error, body); }
 
-            let databaseServers = JSON.parse(body);
-            databaseServers.forEach(this.checkServer);
+            try {
+                let databaseServers = JSON.parse(body);
+                databaseServers.forEach(this.checkServer);
+            } catch (e) {
+                this.sendMessage(this.client.admin, body);
+            }
         })
     }
 
