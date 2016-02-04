@@ -46,12 +46,12 @@ class ServerManager {
         let server = this.bot.servers.get('id', databaseServer.identifier);
 
         if (databaseServer.invite_code === undefined) {
-            return this.getNewInviteCode(server);
+            //return this.getNewInviteCode(server);
         }
 
         this.bot.getInvite(databaseServer.invite_code, (error) => {
             if (error) {
-                return this.getNewInviteCode(server);
+                //return this.getNewInviteCode(server);
             }
         });
     }
