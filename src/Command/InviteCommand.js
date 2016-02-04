@@ -42,7 +42,7 @@ class InviteCommand extends AbstractCommand {
                         throw Error(err);
                     }
                     let json = JSON.parse(body);
-                    if (this.message.botMention) {
+                    if (this.message.isPm()) {
                         if (this.message.author.id == CARBON_BOT_ID) {
                             this.client.joinServer(this.code, (error, server) => {
                                 if (error) {
