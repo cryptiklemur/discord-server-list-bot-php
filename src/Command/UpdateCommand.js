@@ -23,7 +23,7 @@ class UpdateCommand extends AbstractCommand {
                     return;
                 }
 
-                if (this.message.author.id !== server.owner.id) {
+                if (this.message.author.id !== server.owner.id && this.message.author.id !== this.client.admin.id) {
                     this.reply("You aren't the owner of this server.");
 
                     return;
