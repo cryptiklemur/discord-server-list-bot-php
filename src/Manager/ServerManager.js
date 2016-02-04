@@ -1,16 +1,16 @@
 const _ = require('lodash');
 
 class ServerManager {
-    constructor(bot, api) {
-        this.bot = bot;
-        this.api = api;
+    constructor(client, api) {
+        this.client = client;
+        this.api    = api;
 
         this.checkServer = this.checkServer.bind(this);
     }
 
     manage() {
         let servers = [];
-        this.bot.servers.forEach(server => {
+        this.client.servers.forEach(server => {
             let pretty = {
                 id:         server.id,
                 name:       server.name,
@@ -47,13 +47,13 @@ class ServerManager {
     }
 
     checkServer(databaseServer) {
-        let server = this.bot.servers.get('id', databaseServer.identifier);
+        let server = this.client.servers.get('id', databaseServer.identifier);
 
         if (databaseServer.invite_code === undefined) {
             //return this.getNewInviteCode(server);
         }
 
-        this.bot.getInvite(databaseServer.invite_code, (error) => {
+        this.client.getInvite(databaseServer.invite_code, (error) => {
             if (error) {
                 //return this.getNewInviteCode(server);
             }
@@ -70,7 +70,7 @@ class ServerManager {
 
                 console.log(server.name.trim() + " has an old invite id");
 
-                this.bot.sendMessage(
+                this.client.sendMessage(
                     server.owner,
                     `Hey there! Your server (${_.trim(server.name)}) is currently using an old invite code for \<http://discordservers.com\>. If you don't update this,
 we can't show your server.
