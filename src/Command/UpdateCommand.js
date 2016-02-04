@@ -7,7 +7,7 @@ class UpdateCommand extends AbstractCommand {
     static get description() { return 'Update a server id with a new invite code'}
 
     handle() {
-        if (!this.message.isPm()) {
+        if (!this.message.isPm() && this.message.server.id !== '115390342735331332') {
             return false
         }
 
