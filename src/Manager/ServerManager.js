@@ -48,6 +48,8 @@ class ServerManager {
 
     checkServer(databaseServer) {
         let server = this.client.servers.get('id', databaseServer.identifier);
+        console.log(databaseServer.invite_code);
+
 
         if (databaseServer.invite_code === undefined) {
             //return this.getNewInviteCode(server);
