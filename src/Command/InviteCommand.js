@@ -1,17 +1,21 @@
 const AbstractCommand = require('discord-bot-base').AbstractCommand;
-const request         = require('request');
+const request = require('request');
 
 const CARBON_BOT_ID = '109338686889476096';
 
 class InviteCommand extends AbstractCommand {
-    static get name() { return 'invite'; }
+    static get name() {
+        return 'invite';
+    }
 
-    static get description() { return "DSL listens for invite codes and messages users asking if they want it listed."; }
+    static get description() {
+        return "DSL listens for invite codes and messages users asking if they want it listed.";
+    }
 
     initialize() {
-        this.checkForReply     = this.checkForReply.bind(this);
+        this.checkForReply = this.checkForReply.bind(this);
         this.currentlyChecking = {};
-        this.api               = this.container.get('api');
+        this.api = this.container.get('api');
     }
 
     handle() {
@@ -25,7 +29,7 @@ class InviteCommand extends AbstractCommand {
             this.currentlyChecking[this.code] = true;
 
             request('https://discordapp.com/api/invite/' + this.code, (err, response, body) => {
-                let json     = JSON.parse(body),
+                let json = JSON.parse(body),
                     serverId = json.guild === undefined ? undefined : json.guild.id;
 
                 if (serverId === undefined) {
@@ -87,9 +91,12 @@ class InviteCommand extends AbstractCommand {
         let content = message.content.toLowerCase();
 
         if (content !== 'yes' && content !== 'no') {
-            this.sendMessage(message.author, "Please reply with 'yes', or 'no'.");
+            this.sendMessage(
+                message.author,
+                "Make sure you reply with `yes` or `no`. If you would like to try again, send me the link again"
+            );
 
-            return;
+            return this.client.removeListener('message', this.checkForReply);
         }
 
         if (content === 'yes') {
@@ -100,7 +107,9 @@ class InviteCommand extends AbstractCommand {
                     console.log(error);
                 }
 
-                if (error) { return console.log("Error for " + server.id, error); }
+                if (error) {
+                    return console.log("Error for " + server.id, error);
+                }
 
                 this.sendMessage(server, `Meep Morp, Hey there! I was invited by ${message.author.mention()}. To see what I do, send me a \`help\` private message, or type \`|help\`.`);
 
