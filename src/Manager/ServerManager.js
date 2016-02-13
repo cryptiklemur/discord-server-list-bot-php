@@ -15,10 +15,6 @@ class ServerManager {
                 return;
             }
 
-            if (!server.members.get('name', 'LFG')) {
-                this.client.deleteChannel(server.channels.get('name', 'event-log'));
-            }
-
             let pretty = {
                 id:         server.id,
                 name:       server.name,
