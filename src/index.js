@@ -5,15 +5,24 @@ const walk          = require('walk');
 const Bot           = require('./Bot');
 const API           = require('./API');
 const ServerManager = require('./Manager/ServerManager');
+const Commands      = require('require-all')(__dirname + '/Command/');
 const es            = require('elasticsearch');
 const env           = process.env;
+
+let commands = [];
+for (let name in Commands) {
+    if (Commands.hasOwnProperty(name)) {
+        if (name !== 'AbstractCommand') {
+            commands.push(Commands[name]);
+        }
+    }
+}
 
 function ElasticSearch(host) {
     return new es.Client({host: host});
 }
 
-let walker  = walk.walk(__dirname + '/Command/', {followLinks: false}),
-    options = {
+let options = {
         admin_id:  env.DISCORD_ADMIN_ID,
         email:     env.DISCORD_EMAIL,
         password:  env.DISCORD_PASSWORD,
@@ -21,7 +30,7 @@ let walker  = walk.walk(__dirname + '/Command/', {followLinks: false}),
         name:      pkg.name,
         version:   pkg.version,
         author:    pkg.author,
-        commands:  [],
+        commands:  commands,
         status:    'www.discservs.co',
         prefix:    "|",
         container: (Bot) => {
@@ -41,16 +50,8 @@ let walker  = walk.walk(__dirname + '/Command/', {followLinks: false}),
         }
     };
 
-walker.on('file', (root, stat, next) => {
-    options.commands.push(require(__dirname + '/Command/' + stat.name));
-
-    next();
-});
-
-walker.on('end', () => {
-    let environment = 'prod';
-    if (env.DISCORD_ENV !== undefined) {
-        environment = env.DISCORD_ENV;
-    }
-    new Bot(environment, environment === 'dev', options);
-});
+let environment = 'prod';
+if (env.DISCORD_ENV !== undefined) {
+    environment = env.DISCORD_ENV;
+}
+new Bot(environment, environment === 'dev', options);
