@@ -11,6 +11,10 @@ class ServerManager {
     manage() {
         let servers = [];
         this.client.servers.forEach(server => {
+            if (!server.owner) {
+                continue;
+            }
+
             let pretty = {
                 id:         server.id,
                 name:       server.name,
