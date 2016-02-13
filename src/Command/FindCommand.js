@@ -34,15 +34,12 @@ class FindCommand extends AbstractCommand {
                 "query": {"filtered": {"query": {"match_all": {}}, "filter": {"and": filters}}}
             }
         };
-        console.log(searchParams.body);
 
         this.es.search(searchParams, this.handleSearchResults.bind(this));
     }
 
     handleSearchResults(err, response) {
-        if (err) {
-            console.log(err);
-        }
+        if (err) { this.logger.error(err); }
 
         let data      = response.hits,
             servers   = data.hits.map((hit) => {

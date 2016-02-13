@@ -33,7 +33,6 @@ class InviteCommand extends AbstractCommand {
                     serverId = json.guild === undefined ? undefined : json.guild.id;
 
                 if (serverId === undefined) {
-                    console.log("BAD INVITE CODE: " + this.code);
                     if (this.message.isPm()) {
                         this.reply("That invite code is invalid. Please try a better one.");
                     }
@@ -50,7 +49,7 @@ class InviteCommand extends AbstractCommand {
                         if (this.message.author.id == CARBON_BOT_ID) {
                             this.client.joinServer(this.code, (error, server) => {
                                 if (error) {
-                                    console.log(error);
+                                    this.looger.error(error);
                                 }
                                 this.reply("Success!");
 
@@ -104,11 +103,11 @@ class InviteCommand extends AbstractCommand {
 
             this.client.joinServer(this.code, (error, server) => {
                 if (error) {
-                    console.log(error);
+                    this.logger.error(error);
                 }
 
                 if (error) {
-                    return console.log("Error for " + server.id, error);
+                    return this.logger.error("Error for " + server.id, error);
                 }
 
                 this.sendMessage(server, `Meep Morp, Hey there! I was invited by ${message.author.mention()}. To see what I do, send me a \`help\` private message, or type \`|help\`.`);

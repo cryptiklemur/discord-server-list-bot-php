@@ -35,7 +35,7 @@ class ServerManager {
 
     updateServers(servers) {
         this.api.call('/servers', 'post', {servers: servers}, (error, response, body) => {
-            if (error) { console.log("Error Updating: ", error, body); }
+            if (error) { this.logger.error("Error Updating: ", error, body); }
 
             try {
                 let databaseServers = JSON.parse(body);
@@ -48,8 +48,6 @@ class ServerManager {
 
     checkServer(databaseServer) {
         let server = this.client.servers.get('id', databaseServer.identifier);
-        console.log(databaseServer.invite_code);
-
 
         if (databaseServer.invite_code === undefined) {
             //return this.getNewInviteCode(server);
@@ -70,7 +68,7 @@ class ServerManager {
                     return;
                 }
 
-                console.log(server.name.trim() + " has an old invite id");
+                this.logger.debug(server.name.trim() + " has an old invite id");
 
                 this.client.sendMessage(
                     server.owner,
@@ -86,7 +84,7 @@ update ${server.id} <new invite url>
 \`\`\``
                 );
             } catch (e) {
-                console.error(e, body);
+                this.logger.error(e, body);
             }
 
         });
