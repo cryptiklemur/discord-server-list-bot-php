@@ -12,7 +12,7 @@ class ServerManager {
         let servers = [];
         this.client.servers.forEach(server => {
             if (!server.owner) {
-                continue;
+                return;
             }
 
             let pretty = {
