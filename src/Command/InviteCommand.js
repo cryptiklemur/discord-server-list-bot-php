@@ -33,7 +33,6 @@ class InviteCommand extends AbstractCommand {
 
             this.currentlyChecking[this.code] = true;
             this.client.getInvite(this.code, (error, info) => {
-                this.logger.info(error, info);
                 if (error) {
                     if (this.message.isPm()) {
                         this.reply("That invite code is invalid. Please try a better one.");
