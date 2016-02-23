@@ -51,7 +51,7 @@ class InviteCommand extends AbstractCommand {
                         if (this.message.author.id == CARBON_BOT_ID) {
                             this.client.joinServer(this.code, (error, server) => {
                                 if (error) {
-                                    this.looger.error(error);
+                                    this.logger.error(error);
                                 }
                                 this.reply("Success!");
 
@@ -60,6 +60,8 @@ class InviteCommand extends AbstractCommand {
 
                             return;
                         }
+                        
+                        this.client.on('message', this.checkForReply);
 
                         return this.reply("Meep Morp, hey! Would you like to list this server? (Yes, or No)");
                     }
