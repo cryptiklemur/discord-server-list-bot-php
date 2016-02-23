@@ -1,5 +1,6 @@
 const AbstractCommand = require('discord-bot-base').AbstractCommand;
 const _ = require('lodash');
+const Server = require('../Model/Server');
 
 class UpdateCommand extends AbstractCommand {
     static get name() { return 'update'; }
@@ -12,7 +13,7 @@ class UpdateCommand extends AbstractCommand {
         }
 
         return this.responds(
-            /^update (\d+) (?:<?)(?:https?:\/\/(?:discord.gg|discordapp.com\/invite)\/)([A-Za-z0-9]+)(?:>?)$/gmi,
+            /^update (\d+) (?:<?)(?:(?:https?:\/\/)?(?:discord.gg|discordapp.com\/invite)\/)?([A-Za-z0-9]+)(?:>?)$/gmi,
             (matches) => {
                 let id     = matches[1],
                     server = this.client.servers.get('id', id);
@@ -29,8 +30,30 @@ class UpdateCommand extends AbstractCommand {
                     return;
                 }
 
-                this.reply("Updating " + _.trim(server.name) + " with new invite code: " + matches[2]);
-                this.container.get('api').call('/server/' + server.id, 'post', {id: id, invite_code: matches[2]});
+                Server.findOne({serverId: server.id}, (error, server) => {
+                    if (error) {
+                        this.logger.error(error);
+
+                        return this.reply("There was an error updating your server. Try again later.");
+                    }
+
+                    if (!server) {
+                        this.reply("Bad server id");
+
+                        return;
+                    }
+
+                    server.inviteCode = matches[2];
+                    server.save(error => {
+                        if (error) {
+                            this.logger.error(error);
+
+                            return this.reply("There was an error updating your server. Try again later.");
+                        }
+
+                        this.reply("Updating " + _.trim(server.name) + " with new invite code: " + matches[2]);
+                    });
+                });
             });
     }
 }

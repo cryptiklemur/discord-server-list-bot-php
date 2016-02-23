@@ -1,5 +1,7 @@
 const AbstractCommand = require('discord-bot-base').AbstractCommand;
-const request = require('request');
+const request         = require('request');
+const Server          = require('../Model/Server');
+const InviteRequest   = require('../Model/InviteRequest');
 
 const CARBON_BOT_ID = '109338686889476096';
 
@@ -13,13 +15,16 @@ class InviteCommand extends AbstractCommand {
     }
 
     initialize() {
-        this.checkForReply = this.checkForReply.bind(this);
+        this.checkForReply     = this.checkForReply.bind(this);
         this.currentlyChecking = {};
-        this.api = this.container.get('api');
     }
 
     handle() {
         return this.hears(/https:\/\/discord\.gg\/(.*)/g, (matches) => {
+            if (matches[0].indexOf('update') === 0) {
+                return;
+            }
+
             this.code = matches[1];
 
             if (this.currentlyChecking[this.code]) {
@@ -27,24 +32,22 @@ class InviteCommand extends AbstractCommand {
             }
 
             this.currentlyChecking[this.code] = true;
-
-            request('https://discordapp.com/api/invite/' + this.code, (err, response, body) => {
-                let json = JSON.parse(body),
-                    serverId = json.guild === undefined ? undefined : json.guild.id;
-
-                if (serverId === undefined) {
+            this.client.getInvite(this.code, (error, info) => {
+                this.logger.info(error, info);
+                if (error) {
                     if (this.message.isPm()) {
                         this.reply("That invite code is invalid. Please try a better one.");
                     }
 
+                    this.logger.error(error);
                     return;
                 }
 
-                this.api.call('/invite/' + this.message.author.id + '/' + serverId, 'get', {}, (err, response, body) => {
-                    if (err) {
-                        throw Error(err);
+                Server.findOne({serverId: info.server.id}, (error, server) => {
+                    if (error || server) {
+                        return;
                     }
-                    let json = JSON.parse(body);
+
                     if (this.message.isPm()) {
                         if (this.message.author.id == CARBON_BOT_ID) {
                             this.client.joinServer(this.code, (error, server) => {
@@ -59,27 +62,61 @@ class InviteCommand extends AbstractCommand {
                             return;
                         }
 
-                        this.reply("Meep Morp, hey! Would you like to list this server? (Yes, or No)");
-                    } else {
-                        if (json.message === 'has-request') {
-                            return;
-                        }
-
-                        this.sendMessage(
-                            this.message.author,
-                            `Meep Morp, hey there! I just saw you post your server link. \nWould you like to have it registered with the http://www.discordservers.com public server list? (Yes, or No)
-
-                            Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message @Aaron in Discord Bots, or tweet @aequasi for help/issues.`
-                        );
+                        return this.reply("Meep Morp, hey! Would you like to list this server? (Yes, or No)");
                     }
 
-                    this.client.on('message', this.checkForReply);
-                });
-            });
+                    InviteRequest.find(
+                        {serverId: info.server.id, authorId: this.message.author.id},
+                        (error, requests) => {
+                            let fifteenDaysAgo = new Date();
+                            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 3);
 
-            return true;
+                            if (requests.length === 0) {
+                                let request = new InviteRequest({
+                                    serverId: info.server.id,
+                                    authorId: this.message.author.id
+                                });
+
+                                return request.save(error => {
+                                    if (error) {
+                                        return this.logger.error(error);
+                                    }
+
+                                    this.sendInviteRequest();
+                                })
+                            }
+
+                            for (let index in requests) {
+                                if (!requests.hasOwnProperty(index)) {
+                                    continue;
+                                }
+
+                                let request = requests[index];
+                                if (request.insertDate > fifteenDaysAgo) {
+                                    request.remove();
+                                } else {
+                                    return false;
+                                }
+                            }
+
+                            this.sendInviteRequest();
+                        }
+                    )
+                })
+            });
         })
 
+    }
+
+    sendInviteRequest() {
+        this.sendMessage(
+            this.message.author,
+            `Hey there! I just saw you post your server link. Would you like to have it registered with the <http://www.discordservers.com> public server list? (Yes, or No)
+
+ **Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message @Aaron in Discord Bots, or tweet @discservs for help/issues.**`
+        );
+
+        this.client.on('message', this.checkForReply);
     }
 
     checkForReply(message) {
@@ -122,10 +159,8 @@ If you don't want the bot on your server, just kick it.`
                     );
                 }
 
-                this.api.call(
-                    '/server/' + server.id,
-                    'post', {id: server.id, name: server.name, invite_code: this.code}
-                );
+                let dbServer = new Server({identifier: server.id, inviteCode: this.code});
+                dbServer.save();
             });
         } else {
             this.sendMessage(message.author, 'Alright, if you change your mind, just send me a link again.');
