@@ -37,9 +37,12 @@ class ServerManager {
         this.dispatcher = dispatcher;
         this.client     = client;
         this.logger     = logger;
+        this.lastRun    = Math.round(new Date().getTime() / 1000);
     }
 
     updateNextServer() {
+        this.lastRun = Math.round(new Date().getTime() / 1000);
+
         this.servers.next();
         if (this.servers.done()) {
             return this.dispatcher.emit('manager.server.done');
@@ -127,16 +130,25 @@ class ServerManager {
         });
 
         this.dispatcher.emit('manager.server.start');
+
+        setInterval(() => {
+            let currentTime = Math.round(new Date().getTime() / 1000) - 60;
+            if (currentTime - this.lastRun >= 0) {
+                this.logger.info("Manager died. Starting up again.");
+                this.dispatcher.emit('manager.server.start');
+            }
+        }, 5000)
     }
 
     checkConnectedServers() {
         return new Promise(resolve => {
             for (let index in this.client.servers) {
-                if (!this.client.servers.hasOwnProperty(index) || index === 'length') {
+                if (!this.client.servers.hasOwnProperty(index) || index === 'length' || index === 'limit') {
                     continue;
                 }
 
                 let server = this.client.servers[index];
+
                 if (this.servers.all().find(dbServer => dbServer.identifier === server.id)) {
                     continue;
                 }
