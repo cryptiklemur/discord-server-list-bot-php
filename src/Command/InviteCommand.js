@@ -60,7 +60,7 @@ class InviteCommand extends AbstractCommand {
 
                             return;
                         }
-                        
+
                         this.client.on('message', this.checkForReply);
 
                         return this.reply("Meep Morp, hey! Would you like to list this server? (Yes, or No)");
@@ -70,7 +70,7 @@ class InviteCommand extends AbstractCommand {
                         {serverId: info.server.id, authorId: this.message.author.id},
                         (error, requests) => {
                             let fifteenDaysAgo = new Date();
-                            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 3);
+                            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
 
                             if (requests.length === 0) {
                                 let request = new InviteRequest({
@@ -141,27 +141,27 @@ class InviteCommand extends AbstractCommand {
 
             this.client.joinServer(this.code, (error, server) => {
                 if (error) {
-                    this.logger.error(error);
-                }
-
-                if (error) {
                     return this.logger.error("Error for " + server.id, error);
                 }
 
-                this.sendMessage(server, `Meep Morp, Hey there! I was invited by ${message.author.mention()}. To see what I do, send me a \`help\` private message, or type \`|help\`.`);
-
-                if (server.owner.id !== message.author.id) {
-                    this.sendMessage(
-                        server.owner,
-                        `Hey there. I was invited to ${server.name} by ${message.author.username}. I am a bot for <http://discordservers.com/>.
-This bot is not affiliated with discord, in any way. If you have any questions about the bot, try sending a \`help\` message, or tweet @aequasi.
-
-If you don't want the bot on your server, just kick it.`
-                    );
-                }
-
                 let dbServer = new Server({identifier: server.id, inviteCode: this.code});
-                dbServer.save();
+                dbServer.save(error => {
+                    if (error) {
+                        return this.logger.error(error);
+                    }
+
+                    this.sendMessage(server, `Hey there! I was invited by ${message.author.mention()}. To see what I do, send me a \`help\` private message, or type \`|help\`.`);
+
+                    if (server.owner.id !== message.author.id) {
+                        this.sendMessage(
+                            server.owner,
+                            `Hey there. I was invited to ${server.name} by ${message.author.username}. I am a bot for <http://discordservers.com/>.
+**This bot is not affiliated with discord, in any way.** If you have any questions about the bot, try sending a \`help\` message, or tweet @aequasi.
+
+If you don't want the bot on your server, type \`|delist\` in your server.`
+                        );
+                    }
+                });
             });
         } else {
             this.sendMessage(message.author, 'Alright, if you change your mind, just send me a link again.');

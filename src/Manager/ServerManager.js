@@ -148,7 +148,6 @@ class ServerManager {
                 }
 
                 let server = this.client.servers[index];
-
                 if (this.servers.all().find(dbServer => dbServer.identifier === server.id)) {
                     continue;
                 }
