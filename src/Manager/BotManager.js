@@ -50,8 +50,9 @@ class BotManager {
 
         this.dispatcher.on('manager.bot.start', () => {
             this.logger.info("Starting bot manager");
+            this.lastRun = Math.round(new Date().getTime() / 1000);
+            
             this.fetchBots().then(() => {
-
                 this.ignoreHelper.getIgnores(ignored => {
                     this.ignoreHelper.batchIgnore('user', this.bots.map(bot => bot.id), this.logger.info);
                 });
@@ -71,7 +72,7 @@ class BotManager {
         this.dispatcher.emit('manager.bot.start');
 
         setInterval(() => {
-            let currentTime = Math.round(new Date().getTime() / 1000) - (WAIT_TIME * 2);
+            let currentTime = Math.round(new Date().getTime() / 1000) - (WAIT_TIME + 1);
             if (currentTime - this.lastRun >= 0) {
                 this.logger.info("Bot Manager died. Starting up again.");
                 this.dispatcher.emit('manager.bot.start');
