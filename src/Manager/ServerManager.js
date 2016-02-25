@@ -111,7 +111,7 @@ class ServerManager {
         // After each server, wait 5 seconds (should be configurable)
 
         this.dispatcher.on('manager.server.start', () => {
-            this.logger.debug("Starting server manager");
+            this.logger.info("Starting server manager");
             Server.find({}, (error, servers) => {
                 this.servers = makeIterator(servers);
                 this.checkConnectedServers()

@@ -48,7 +48,7 @@ class BotManager {
         // After updating, wait 5 minutes, and then run again (Should be configurable)
 
         this.dispatcher.on('manager.bot.start', () => {
-            this.logger.debug("Starting bot manager");
+            this.logger.info("Starting bot manager");
             this.fetchBots().then(() => {
                 this.updateBots();
             }).catch(error => {
