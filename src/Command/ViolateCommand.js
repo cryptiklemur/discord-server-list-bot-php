@@ -15,10 +15,9 @@ class ViolateCommand extends AbstractCommand {
         return this.responds(/^violate (\d+) ?([\S\s]+)?$/gmi, (matches) => {
                 let id     = matches[1],
                     server = this.client.servers.get('id', id),
-                    message = matches[2] !== undefined ? matches[2] : `Your server has been removed for violating the terms of service of DiscordServers.com.
+                    message = matches[2] !== undefined ? matches[2] : `Your server has been removed for violating the Terms of Service of DiscordServers.com.
 If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` in the \`Discord Bots\` server. View the TOS here: http://www.discordservers.com/terms`;
 
-                console.log('Bot server: ', server);
                 if (server === null) {
                     this.reply("Bad server id");
 
@@ -32,7 +31,6 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                         return this.reply("There was an error updating that server. Try again later.");
                     }
 
-                    console.log('Db Server: ', server);
                     if (!server) {
                         this.reply("Bad server id");
 
@@ -49,7 +47,10 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
 
                         let owner = this.client.users.get('id', server.owner.id);
                         this.client.sendMessage(owner, message);
-                        this.reply(`Send owner of ${server.name} (${owner.name}) the following message: \n\n\`\`\`${message}\`\`\``)
+
+                        let reply = `Sent owner of ${server.name} (${owner.name}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
+                        this.logger.info(reply);
+                        this.client.sendMessage(this.client.admin, reply);
                     });
                 });
             });
