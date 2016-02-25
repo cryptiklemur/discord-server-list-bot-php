@@ -32,11 +32,14 @@ let options = {
     commands:  commands,
     status:    'http://discservs.co',
     prefix:    "|",
+    redis_url: env.DISCORD_REDIS_URL,
+    mongo_url: env.DISCORD_MONGO_URL,
+    queue:     {
+        host: env.DISCORD_RABBIT_HOST
+    },
     container: (Bot) => {
         return {
             parameters: {
-                redis_url:         env.DISCORD_REDIS_URL,
-                mongo_url:         env.DISCORD_MONGO_URL,
                 elasticsearch_url: env.DISCORD_ELASTICSEARCH
             },
             services:   {
