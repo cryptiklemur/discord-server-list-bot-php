@@ -34,11 +34,12 @@ function makeIterator(array) {
 }
 
 class BotManager {
-    constructor(dispatcher, client, logger, channelHelper) {
+    constructor(dispatcher, client, logger, channelHelper, ignoreHelper) {
         this.dispatcher    = dispatcher;
         this.client        = client;
         this.logger        = logger;
         this.channelHelper = channelHelper;
+        this.ignoreHelper  = ignoreHelper;
         this.lastRun       = Math.round(new Date().getTime() / 1000);
     }
 
@@ -50,6 +51,11 @@ class BotManager {
         this.dispatcher.on('manager.bot.start', () => {
             this.logger.info("Starting bot manager");
             this.fetchBots().then(() => {
+
+                this.ignoreHelper.getIgnores(ignored => {
+                    this.ignoreHelper.batchIgnore('user', this.bots.map(bot => bot.id), this.logger.info);
+                });
+
                 this.updateBots();
             }).catch(error => {
                 throw error

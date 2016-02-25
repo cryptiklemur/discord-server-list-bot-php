@@ -49,7 +49,13 @@ let options = {
                 },
                 'manager.bot':    {
                     module: BotManager,
-                    args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}, {$ref: 'helper.channel'}]
+                    args:   [
+                        {$ref: 'dispatcher'},
+                        {$ref: 'client'},
+                        {$ref: 'logger'},
+                        {$ref: 'helper.channel'},
+                        {$ref: 'helper.ignore'}
+                    ]
                 },
                 search:           {module: ElasticSearch, args: ['%elasticsearch_url%']}
             }
