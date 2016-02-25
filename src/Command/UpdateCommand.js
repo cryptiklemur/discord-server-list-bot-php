@@ -44,6 +44,8 @@ class UpdateCommand extends AbstractCommand {
                     }
 
                     server.inviteCode = matches[2];
+                    server.enabled    = true;
+                    server.private    = false;
                     server.save(error => {
                         if (error) {
                             this.logger.error(error);

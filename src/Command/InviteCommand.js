@@ -126,14 +126,13 @@ class InviteCommand extends AbstractCommand {
         }
 
         let content = message.content.toLowerCase();
+        this.client.removeListener('message', this.checkForReply);
 
         if (content !== 'yes' && content !== 'no') {
-            this.sendMessage(
+            return this.sendMessage(
                 message.author,
                 "Make sure you reply with `yes` or `no`. If you would like to try again, send me the link again"
             );
-
-            return this.client.removeListener('message', this.checkForReply);
         }
 
         if (content === 'yes') {
@@ -168,7 +167,6 @@ If you don't want the bot on your server, type \`|delist\` in your server.`
         }
 
         this.currentlyChecking[this.code] = false;
-        this.client.removeListener('message', this.checkForReply);
     }
 }
 

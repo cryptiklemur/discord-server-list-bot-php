@@ -5,7 +5,7 @@ class Bot extends BaseBot {
         super.onReady();
 
         this.container.get('manager.server').manage();
-        //setInterval(() => {this.container.get('manager.server').manage()}, 30000);
+        this.container.get('manager.bot').manage();
     }
 }
 

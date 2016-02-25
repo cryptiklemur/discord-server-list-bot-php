@@ -3,6 +3,7 @@
 const pkg           = require('../package');
 const Bot           = require('./Bot');
 const ServerManager = require('./Manager/ServerManager');
+const BotManager    = require('./Manager/BotManager');
 const Commands      = require('require-all')(__dirname + '/Command/');
 const es            = require('elasticsearch');
 const env           = process.env;
@@ -42,6 +43,10 @@ let options = {
                 'manager.server': {
                     module: ServerManager,
                     args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}]
+                },
+                'manager.bot':    {
+                    module: BotManager,
+                    args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}, {$ref: 'helper.channel'}]
                 },
                 search:           {module: ElasticSearch, args: ['%elasticsearch_url%']}
             }
