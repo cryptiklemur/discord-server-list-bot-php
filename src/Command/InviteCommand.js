@@ -93,7 +93,7 @@ class InviteCommand extends AbstractCommand {
                                 }
 
                                 let request = requests[index];
-                                if (request.insertDate > fifteenDaysAgo) {
+                                if (request.insertDate <= fifteenDaysAgo) {
                                     request.remove();
                                 } else {
                                     return false;
