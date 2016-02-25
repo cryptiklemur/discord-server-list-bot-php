@@ -56,8 +56,9 @@ class ServerManager {
         }
 
         if (botServer === null) {
-            this.logger.debug('Bot is not connected to this server. Disabling.');
+            this.logger.debug(`Bot is not connected to ${dbServer.name}. Disabling.`);
             dbServer.enabled = false;
+            dbServer.private = true;
             return dbServer.save(error => {
                 if (error) {
                     return this.logger.error(error);

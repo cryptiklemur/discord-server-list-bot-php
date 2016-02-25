@@ -30,7 +30,7 @@ class UpdateCommand extends AbstractCommand {
                     return;
                 }
 
-                Server.findOne({serverId: server.id}, (error, server) => {
+                Server.findOne({identifier: server.id}, (error, server) => {
                     if (error) {
                         this.logger.error(error);
 
