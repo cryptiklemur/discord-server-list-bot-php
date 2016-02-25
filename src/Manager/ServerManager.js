@@ -56,7 +56,7 @@ class ServerManager {
         }
 
         if (botServer === null) {
-            //this.logger.debug('Bot is not connected to this server. Disabling.');
+            this.logger.debug('Bot is not connected to this server. Disabling.');
             dbServer.enabled = false;
             return dbServer.save(error => {
                 if (error) {
@@ -72,6 +72,7 @@ class ServerManager {
         dbServer.members      = botServer.members.length;
         dbServer.online       = botServer.members.filter(user => user.status != 'offline').length;
         dbServer.icon         = botServer.iconURL;
+        dbServer.enabled      = true;
         dbServer.owner        = {id: botServer.owner.id, name: botServer.owner.username};
         dbServer.modifiedDate = Date.now();
 

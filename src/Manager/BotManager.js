@@ -51,7 +51,7 @@ class BotManager {
         this.dispatcher.on('manager.bot.start', () => {
             this.logger.info("Starting bot manager");
             this.lastRun = Math.round(new Date().getTime() / 1000);
-            
+
             this.fetchBots().then(() => {
                 this.ignoreHelper.getIgnores(ignored => {
                     this.ignoreHelper.batchIgnore('user', this.bots.map(bot => bot.id), this.logger.info);
