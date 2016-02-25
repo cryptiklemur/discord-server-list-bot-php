@@ -49,6 +49,7 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
 
                         let owner = this.client.users.get('id', server.owner.id);
                         this.client.sendMessage(owner, message);
+                        this.reply(`Send owner of ${server.name} (${owner.name}) the following message: \n\n\`\`\`${message}\`\`\``)
                     });
                 });
             });
