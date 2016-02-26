@@ -15,6 +15,7 @@ const Server = new Schema({
     icon:         {type: String},
     region:       {type: String},
     private:      {type: Boolean, default: false},
+    bid:          {type: Number, default: 0},
     premium:      {type: Boolean, default: false},
     members:      {type: Number},
     online:       {type: Number},

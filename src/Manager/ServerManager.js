@@ -86,18 +86,36 @@ class ServerManager {
 
             this.client.getInvite(dbServer.inviteCode, (error, invite) => {
                 if (error) {
-                    //this.logger.debug("Server's invite code is invalid or expired.");
-                    this.getNewInviteCode(botServer);
-                    dbServer.inviteCode = undefined;
-                    dbServer.enabled    = false;
+                    this.logger.debug("Server's invite code is invalid or expired.");
 
-                    return dbServer.save(error => {
-                        if (error) {
-                            return this.logger.error(error);
+                    return this.getNewInviteCode(
+                        botServer,
+                        (invite) => {
+                            this.logger.debug(dbServer.name + "'s invite code successfully updated");
+                            dbServer.inviteCode = invite.code;
+                            dbServer.enabled    = true;
+
+                            return dbServer.save(error => {
+                                if (error) {
+                                    return this.logger.error(error);
+                                }
+
+                                return setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME);
+                            });
+                        },
+                        () => {
+                            dbServer.inviteCode = undefined;
+                            dbServer.enabled    = false;
+
+                            return dbServer.save(error => {
+                                if (error) {
+                                    return this.logger.error(error);
+                                }
+
+                                return setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME);
+                            });
                         }
-
-                        return setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME);
-                    });
+                    );
                 }
 
                 //this.logger.debug(`Server finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`);
@@ -178,23 +196,50 @@ class ServerManager {
         });
     }
 
-    sendUpdateRequest(server) {
-        this.client.sendMessage(
-            server.owner,
-            `Hey there! Your server (${_.trim(server.name)}) is currently using an old invite code for \<http://discordservers.com\>. If you don't update this,
-we can't show your server.
+    getNewInviteCode(server, successCallback, unchangedCallback) {
+        this.client.getInvites(server, (error, invites) => {
+            if (error || !invites || invites.length < 1) {
+                return this.client.createInvite(server.defaultChannel.id, {temporary: false}, (error, invite) => {
+                    if (error || !invite) {
+                        return this.checkInviteUpdate(server, unchangedCallback);
+                    }
 
-***Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message \`Aaron\` in Discord Bots, or tweet \`@aequasi\` for help/issues.***
+                    successCallback(invite);
+                });
+            }
 
-Please reply with a new invite link (preferably a permanent link), in the following format.
-
-\`\`\`
-update ${server.id} <new invite url>
-\`\`\``
-        );
+            let invite = this.getBestInvite(invites);
+            if (invite !== null) {
+                return successCallback(invite);
+            }
+        });
     }
 
-    getNewInviteCode(server) {
+    getBestInvite(invites) {
+        let bestInvite = null;
+        for (let index in invites) {
+            if (!invites.hasOwnProperty(index)) {
+                continue;
+            }
+
+            let invite = invites[index];
+            if (!bestInvite) {
+                bestInvite = invite;
+            }
+
+            if (invite.temporary || invite.revoked) {
+                continue;
+            }
+
+            if (invite.channel.name === 'general') {
+                bestInvite = invite;
+            }
+        }
+
+        return bestInvite;
+    }
+
+    checkInviteUpdate(server, callback) {
         InviteUpdate.find({serverId: server.id}, (error, requests) => {
             let threeDaysAgo = new Date();
             threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
@@ -208,6 +253,7 @@ update ${server.id} <new invite url>
                     }
 
                     this.sendUpdateRequest(server);
+                    callback();
                 })
             }
 
@@ -225,7 +271,24 @@ update ${server.id} <new invite url>
             }
 
             this.sendUpdateRequest(server);
+            callback();
         });
+    }
+
+    sendUpdateRequest(server) {
+        this.client.sendMessage(
+            server.owner,
+            `Hey there! Your server (${_.trim(server.name)}) is currently using an old invite code for \<http://discordservers.com\>. If you don't update this,
+we can't show your server.
+
+***Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message \`Aaron\` in Discord Bots, or tweet \`@aequasi\` for help/issues.***
+
+Please reply with a new invite link (preferably a permanent link), in the following format.
+
+\`\`\`
+update ${server.id} <new invite url>
+\`\`\``
+        );
     }
 }
 
