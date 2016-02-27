@@ -24,30 +24,31 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                     return;
                 }
 
-                Server.findOne({identifier: server.id}, (error, server) => {
+                Server.findOne({identifier: server.id}, (error, dbServer) => {
                     if (error) {
                         this.logger.error(error);
 
                         return this.reply("There was an error updating that server. Try again later.");
                     }
 
-                    if (!server) {
+                    if (!dbServer) {
                         this.reply("Bad server id");
 
                         return;
                     }
 
-                    server.remove(error => {
+                    this.client.leaveServer(server);
+                    dbServer.remove(error => {
                         if (error) {
                             this.logger.error(error);
 
                             return this.reply("There was an error updating your server. Try again later.");
                         }
 
-                        let owner = this.client.users.get('id', server.owner.id);
+                        let owner = this.client.users.get('id', dbServer.owner.id);
                         this.client.sendMessage(owner, message);
 
-                        let reply = `Sent owner of ${server.name} (${owner.name}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
+                        let reply = `Sent owner of ${dbServer.name} (${owner.name}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
                         this.logger.info(reply);
                         this.client.sendMessage(this.client.admin, reply);
                     });
