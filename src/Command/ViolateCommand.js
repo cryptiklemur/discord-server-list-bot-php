@@ -37,8 +37,7 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                         return;
                     }
 
-                    server.enabled    = false;
-                    server.save(error => {
+                    server.remove(error => {
                         if (error) {
                             this.logger.error(error);
 
