@@ -55,7 +55,7 @@ class FindCommand extends AbstractCommand {
             }),
             padLength = 36;
 
-        let message = "I found the following servers for you: \n\n```",
+        let message = "I found the following servers for you: \n\n",
             delay   = 0,
             added   = 0;
 
@@ -65,8 +65,8 @@ class FindCommand extends AbstractCommand {
 
             name = _.padEnd(name, padLength);
 
-            msg += name + " - " + server.online + "/" + server.members + " members";
-            msg += "\n\t\tdiscservs.co/v/" + server.id + "\n";
+            msg += "**" + name + "**\n";
+            msg += server.online + "/" + server.members + " members - <http://discservs.co/v/" + server.id + ">\n";
 
             if (message.length + msg.length + 1 > 1997) {
                 break;
@@ -77,9 +77,9 @@ class FindCommand extends AbstractCommand {
         }
 
         if (added > 0) {
-            this.sendMessage(this.message.channel, message + "```", delay);
+            this.sendMessage(this.message.channel, message + "", delay);
         } else {
-            this.sendMessage(this.message.channel, "I couldn't find any channels");
+            this.sendMessage(this.message.channel, "I couldn't find any servers");
         }
     }
 }
