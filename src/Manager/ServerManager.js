@@ -109,7 +109,7 @@ class ServerManager {
         }
 
         this.logger.debug(
-            `Server Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`
+            `Server Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} updating.`
         );
 
         this.updateServer(dbServer, botServer)
