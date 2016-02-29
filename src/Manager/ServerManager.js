@@ -40,6 +40,99 @@ class ServerManager {
         this.lastRun    = Math.round(new Date().getTime() / 1000);
     }
 
+    updateServer(dbServer, botServer) {
+        if (dbServer === undefined) {
+            return Server.findOne({identifier: botServer.id}, (error, server) => {
+                if (error) {
+                    return this.logger.error(error);
+                }
+
+                this.updateServer(server, botServer);
+            })
+        }
+
+        if (botServer === undefined) {
+            botServer = this.client.servers.get('id', dbServer.identifier);
+        }
+
+        return new Promise((resolve, reject) => {
+            if (dbServer.private) {
+                return reject();
+            }
+
+            if (botServer === null) {
+                this.logger.debug(`Bot is not connected to ${dbServer.name}. Disabling.`);
+                dbServer.enabled = false;
+                dbServer.private = true;
+                return dbServer.save(error => {
+                    if (error) {
+                        this.logger.error(error);
+                    }
+
+                    return reject();
+                });
+            }
+
+            dbServer.name         = botServer.name;
+            dbServer.region       = botServer.region;
+            dbServer.members      = botServer.members.length;
+            dbServer.online       = botServer.members.filter(user => user.status != 'offline').length;
+            dbServer.icon         = botServer.iconURL;
+            dbServer.enabled      = true;
+            dbServer.owner        = {id: botServer.owner.id, name: botServer.owner.username};
+            dbServer.modifiedDate = Date.now();
+
+            dbServer.save(error => {
+                if (error) {
+                    this.logger.error(error);
+
+                    return reject();
+                }
+
+                //this.logger.debug("Updating server: ", dbServer.name);
+
+                this.client.getInvite(dbServer.inviteCode, (error, invite) => {
+                    if (error) {
+                        this.logger.debug("Server's invite code is invalid or expired.");
+
+                        return this.getNewInviteCode(
+                            botServer,
+                            (invite) => {
+                                this.logger.debug(dbServer.name + "'s invite code successfully updated");
+                                dbServer.inviteCode = invite.code;
+                                dbServer.enabled    = true;
+
+                                return dbServer.save(error => {
+                                    if (error) {
+                                        this.logger.error(error);
+                                    }
+
+                                    return resolve();
+                                });
+                            },
+                            () => {
+                                dbServer.inviteCode = undefined;
+                                dbServer.enabled    = false;
+
+                                return dbServer.save(error => {
+                                    if (error) {
+                                        this.logger.error(error);
+                                    }
+
+                                    return resolve();
+                                });
+                            }
+                        );
+                    }
+
+                    this.logger.debug(`${botServer.name}     finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`);
+
+                    return resolve();
+                });
+            });
+        });
+    }
+
     updateNextServer() {
         this.lastRun = Math.round(new Date().getTime() / 1000);
 
@@ -51,78 +144,9 @@ class ServerManager {
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);
 
-        if (dbServer.private) {
-            return setTimeout(this.updateNextServer.bind(this), 1);
-        }
-
-        if (botServer === null) {
-            this.logger.debug(`Bot is not connected to ${dbServer.name}. Disabling.`);
-            dbServer.enabled = false;
-            dbServer.private = true;
-            return dbServer.save(error => {
-                if (error) {
-                    return this.logger.error(error);
-                }
-
-                return setTimeout(this.updateNextServer.bind(this), 1);
-            });
-        }
-
-        dbServer.name         = botServer.name;
-        dbServer.region       = botServer.region;
-        dbServer.members      = botServer.members.length;
-        dbServer.online       = botServer.members.filter(user => user.status != 'offline').length;
-        dbServer.icon         = botServer.iconURL;
-        dbServer.enabled      = true;
-        dbServer.owner        = {id: botServer.owner.id, name: botServer.owner.username};
-        dbServer.modifiedDate = Date.now();
-
-        dbServer.save(error => {
-            if (error) {
-                return this.logger.error(error);
-            }
-
-            //this.logger.debug("Updating server: ", dbServer.name);
-
-            this.client.getInvite(dbServer.inviteCode, (error, invite) => {
-                if (error) {
-                    this.logger.debug("Server's invite code is invalid or expired.");
-
-                    return this.getNewInviteCode(
-                        botServer,
-                        (invite) => {
-                            this.logger.debug(dbServer.name + "'s invite code successfully updated");
-                            dbServer.inviteCode = invite.code;
-                            dbServer.enabled    = true;
-
-                            return dbServer.save(error => {
-                                if (error) {
-                                    return this.logger.error(error);
-                                }
-
-                                return setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME);
-                            });
-                        },
-                        () => {
-                            dbServer.inviteCode = undefined;
-                            dbServer.enabled    = false;
-
-                            return dbServer.save(error => {
-                                if (error) {
-                                    return this.logger.error(error);
-                                }
-
-                                return setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME);
-                            });
-                        }
-                    );
-                }
-
-                //this.logger.debug(`Server finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`);
-
-                return setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME);
-            });
-        });
+        this.updateServer(dbServer, botServer)
+            .then(() => setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME))
+            .catch(() => setTimeout(this.updateNextServer.bind(this), 1));
     }
 
     manage() {
@@ -133,7 +157,7 @@ class ServerManager {
         this.dispatcher.on('manager.server.start', () => {
             this.logger.info("Starting server manager");
             Server.find({}, (error, servers) => {
-                this.servers = makeIterator(servers);
+                this.servers = makeIterator(_.shuffle(servers));
                 this.checkConnectedServers()
                     .then(() => {
                         this.updateNextServer();
