@@ -12,26 +12,27 @@ class LargestCommand extends AbstractCommand {
 
     initialize() {
         this.es                  = this.container.get('search');
-        this.search              = this.search.bind(this);
         this.handleSearchResults = this.handleSearchResults.bind(this);
     }
 
     handle() {
-        this.responds(/^largest$/g, this.search);
+        this.responds(/^largest$/g, this.search.bind(this, false));
+        this.responds(/^mostactive$/g, this.search.bind(this, true));
     }
 
-    search() {
+    search(mostActive) {
+        let sort = mostActive ? {"members": "desc"} : {"online": "desc"};
+
         let searchParams = {
             index: 'app',
             from:  0,
             size:  10,
             body:  {
-                "sort":  [{"members": "desc"}],
+                "sort":  [sort],
                 "query": {"filtered": {"query": {"match_all": {}}}}
             }
         };
 
-        this.logger.info(searchParams);
         this.es.search(searchParams, this.handleSearchResults.bind(this));
     }
 
@@ -39,8 +40,6 @@ class LargestCommand extends AbstractCommand {
         if (err) {
             return this.logger.error(err);
         }
-
-        this.logger.info(response);
 
         let data      = response.hits,
             servers   = data.hits.map((hit) => {
