@@ -123,7 +123,7 @@ class InviteManager {
             return this.dispatcher.emit('manager.server.done');
         }
 
-        this.logger.debug(`Server Invite Updating: [${this.servers.current()}/${this.servers.all().length}]`);
+        this.logger.debug(`Server Invite Updating: [${this.servers.index()}/${this.servers.all().length}]`);
 
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);
