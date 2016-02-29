@@ -31,13 +31,16 @@ class LargestCommand extends AbstractCommand {
             }
         };
 
+        this.logger.info(searchParams);
         this.es.search(searchParams, this.handleSearchResults.bind(this));
     }
 
     handleSearchResults(err, response) {
         if (err) {
-            this.logger.error(err);
+            return this.logger.error(err);
         }
+
+        this.logger.info(response);
 
         let data      = response.hits,
             servers   = data.hits.map((hit) => {
