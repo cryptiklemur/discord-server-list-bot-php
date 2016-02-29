@@ -26,7 +26,7 @@ function makeIterator(array) {
         push:    function (item) {
             array.push(item);
         },
-        all:     function () {
+        all: function () {
             return array;
         }
     }
@@ -105,6 +105,8 @@ class ServerManager {
         if (this.servers.done()) {
             return this.dispatcher.emit('manager.server.done');
         }
+
+        this.logger.debug(`Server Updating: [${this.servers.current()}/${this.servers.all().length}]`);
 
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);

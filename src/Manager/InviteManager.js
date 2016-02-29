@@ -122,6 +122,8 @@ class InviteManager {
         if (this.servers.done()) {
             return this.dispatcher.emit('manager.server.done');
         }
+        
+        this.logger.debug(`Server Updating: [${this.servers.current()}/${this.servers.all().length}]`);
 
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);
