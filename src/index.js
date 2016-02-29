@@ -2,6 +2,7 @@
 
 const pkg           = require('../package');
 const Bot           = require('./Bot');
+const InviteManager = require('./Manager/InviteManager');
 const ServerManager = require('./Manager/ServerManager');
 const BotManager    = require('./Manager/BotManager');
 const Commands      = require('require-all')(__dirname + '/Command/');
@@ -42,6 +43,10 @@ let options = {
                 }
             },
             services:   {
+                'manager.invite': {
+                    module: InviteManager,
+                    args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}]
+                },
                 'manager.server': {
                     module: ServerManager,
                     args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}]

@@ -7,6 +7,7 @@ class Bot extends BaseBot {
         this.logger.info("Starting managers");
         this.container.get('manager.bot').manage();
         this.container.get('manager.server').manage();
+        this.container.get('manager.invite').manage();
     }
 }
 
