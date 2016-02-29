@@ -17,10 +17,6 @@ for (let name in Commands) {
     }
 }
 
-function ElasticSearch(host) {
-    return new es.Client({host: host});
-}
-
 let options = {
     admin_id:  env.DISCORD_ADMIN_ID,
     email:     env.DISCORD_EMAIL,
@@ -40,7 +36,10 @@ let options = {
     container: (Bot) => {
         return {
             parameters: {
-                elasticsearch_url: env.DISCORD_ELASTICSEARCH
+                elasticsearch: {
+                    host: env.DISCORD_ELASTICSEARCH_HOST,
+                    port: env.DISCORD_ELASTICSEARCH_PORT
+                }
             },
             services:   {
                 'manager.server': {
@@ -57,7 +56,7 @@ let options = {
                         {$ref: 'helper.ignore'}
                     ]
                 },
-                search:           {module: ElasticSearch, args: ['%elasticsearch_url%']}
+                search:           {module: es.Client, args: ['%elasticsearch%']}
             }
         };
     }
