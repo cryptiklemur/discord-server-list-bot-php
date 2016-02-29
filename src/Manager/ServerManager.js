@@ -2,7 +2,7 @@ const _            = require('lodash');
 const Server       = require('../Model/Server');
 const InviteUpdate = require('../Model/InviteUpdate');
 
-const WAIT_TIME = .5;
+const WAIT_TIME = .1;
 
 function makeIterator(array) {
     var currentIndex = -1;
