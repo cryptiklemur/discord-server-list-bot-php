@@ -21,7 +21,7 @@ class LargestCommand extends AbstractCommand {
     }
 
     search(mostActive) {
-        let sort = mostActive ? {"members": "desc"} : {"online": "desc"};
+        let sort = !mostActive ? {"members": "desc"} : {"online": "desc"};
 
         let searchParams = {
             index: 'app',

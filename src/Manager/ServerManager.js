@@ -56,23 +56,6 @@ class ServerManager {
         }
 
         return new Promise((resolve, reject) => {
-            if (dbServer.private) {
-                return reject();
-            }
-
-            if (botServer === null) {
-                this.logger.debug(`Bot is not connected to ${dbServer.identifier}. Disabling.`);
-                dbServer.enabled = false;
-                dbServer.private = true;
-                return dbServer.save(error => {
-                    if (error) {
-                        this.logger.error(error);
-                    }
-
-                    return reject();
-                });
-            }
-
             dbServer.name         = botServer.name;
             dbServer.region       = botServer.region;
             dbServer.members      = botServer.members.length;
@@ -107,6 +90,23 @@ class ServerManager {
 
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);
+
+        if (dbServer.private) {
+            return setTimeout(this.updateNextServer.bind(this), 1);
+        }
+
+        if (botServer === null) {
+            this.logger.debug(`Bot is not connected to ${dbServer.identifier}. Disabling.`);
+            dbServer.enabled = false;
+            dbServer.private = true;
+            return dbServer.save(error => {
+                if (error) {
+                    this.logger.error(error);
+                }
+
+                return setTimeout(this.updateNextServer.bind(this), 1);
+            });
+        }
 
         this.logger.debug(
             `Server Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`
