@@ -41,7 +41,7 @@ class ServerManager {
     }
 
     updateServer(dbServer, botServer) {
-        if (dbServer === undefined) {
+        if (!dbServer) {
             return Server.findOne({identifier: botServer.id}, (error, server) => {
                 if (error) {
                     return this.logger.error(error);
@@ -51,7 +51,7 @@ class ServerManager {
             })
         }
 
-        if (botServer === undefined) {
+        if (!botServer) {
             botServer = this.client.servers.get('id', dbServer.identifier);
         }
 
@@ -61,7 +61,7 @@ class ServerManager {
             }
 
             if (botServer === null) {
-                this.logger.debug(`Bot is not connected to ${dbServer.name}. Disabling.`);
+                this.logger.debug(`Bot is not connected to ${dbServer.identifier}. Disabling.`);
                 dbServer.enabled = false;
                 dbServer.private = true;
                 return dbServer.save(error => {
@@ -91,7 +91,6 @@ class ServerManager {
 
                 //this.logger.debug("Updating server: ", dbServer.name);
 
-                this.logger.debug(`${botServer.name} finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`);
 
                 return resolve();
             });
@@ -106,10 +105,12 @@ class ServerManager {
             return this.dispatcher.emit('manager.server.done');
         }
 
-        this.logger.debug(`Server Updating: [${this.servers.index()}/${this.servers.all().length}]`);
-
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);
+
+        this.logger.debug(
+            `Server Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} finished updating. Waiting ${WAIT_TIME} seconds, then updating next server.`
+        );
 
         this.updateServer(dbServer, botServer)
             .then(() => setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME))

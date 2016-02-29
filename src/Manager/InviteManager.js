@@ -41,7 +41,7 @@ class InviteManager {
     }
 
     updateServer(dbServer, botServer) {
-        if (dbServer === undefined) {
+        if (!dbServer) {
             return Server.findOne({identifier: botServer.id}, (error, server) => {
                 if (error) {
                     return this.logger.error(error);
@@ -51,7 +51,7 @@ class InviteManager {
             })
         }
 
-        if (botServer === undefined) {
+        if (!botServer) {
             botServer = this.client.servers.get('id', dbServer.identifier);
         }
 
@@ -107,8 +107,6 @@ class InviteManager {
                         );
                     }
 
-                    this.logger.debug(`${botServer.name} invite finished updating. Waiting ${WAIT_TIME} seconds, then updating next invite.`);
-
                     return resolve();
                 });
             });
@@ -123,10 +121,12 @@ class InviteManager {
             return this.dispatcher.emit('manager.server.done');
         }
 
-        this.logger.debug(`Server Invite Updating: [${this.servers.index()}/${this.servers.all().length}]`);
-
         let dbServer  = this.servers.current(),
             botServer = this.client.servers.get('id', dbServer.identifier);
+
+        this.logger.debug(
+            `Server Invite Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} finished updating invite. Waiting ${WAIT_TIME} seconds, then updating next server.`
+        );
 
         this.updateServer(dbServer, botServer)
             .then(() => setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME))
