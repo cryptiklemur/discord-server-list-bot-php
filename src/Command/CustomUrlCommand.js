@@ -55,12 +55,7 @@ Custom URL has to be at least three characters long.`;
                             return this.reply("Unable to set a URL at this time.");
                         }
 
-                        console.log(this.container.getParameter('env'));
-                        let newUrl = (this.container.getParameter('env') !== 'dev'
-                                ? 'https://discservs.co/s/'
-                                : 'http://dev.discordservers.com/s/')
-                            + url;
-
+                        let newUrl = 'https://discservs.co/s/' + url;
                         this.reply("Custom URL has been set. Your new URL is: <" + newUrl + ">");
                     })
                 })
