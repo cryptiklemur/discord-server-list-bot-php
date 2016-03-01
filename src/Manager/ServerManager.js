@@ -109,7 +109,7 @@ class ServerManager {
         }
 
         this.logger.debug(
-            `Server Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} updating.`
+            `Server Update: [${this.servers.index()}/${this.servers.all().length - 1}] - ${botServer.id} updating.`
         );
 
         this.updateServer(dbServer, botServer)

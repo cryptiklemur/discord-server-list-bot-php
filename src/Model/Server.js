@@ -17,6 +17,7 @@ const Server = new Schema({
     private:      {type: Boolean, default: false},
     bid:          {type: Number, default: 0},
     premium:      {type: Boolean, default: false},
+    customUrl:    {type: String, index: {unique: true}},
     members:      {type: Number},
     online:       {type: Number},
     insertDate:   {type: Date, default: Date.now()},

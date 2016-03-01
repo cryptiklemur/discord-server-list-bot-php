@@ -125,7 +125,7 @@ class InviteManager {
         }
 
         this.logger.debug(
-            `Server Invite Update: [${this.servers.index()}/${this.servers.all().length}] - ${botServer.id} updating invite.`
+            `Server Invite Update: [${this.servers.index()}/${this.servers.all().length - 1}] - ${botServer.id} updating invite.`
         );
 
         this.updateServer(dbServer, botServer)
