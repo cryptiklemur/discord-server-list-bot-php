@@ -42,7 +42,11 @@ class InviteCommand extends AbstractCommand {
                     return;
                 }
 
-                Server.findOne({serverId: info.server.id}, (error, server) => {
+                if (this.client.servers.get('id', info.server.id)) {
+                    return;
+                }
+
+                Server.findOne({identifier: info.server.id}, (error, server) => {
                     if (error || server) {
                         return;
                     }
