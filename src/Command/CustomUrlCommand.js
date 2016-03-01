@@ -22,8 +22,6 @@ Custom URL has to be at least three characters long.`;
         });
 
         return this.responds(/^(custom(?:\s?url)?)\s/, matches => {
-            console.log(arguments);
-            console.log(this.message.isPm());
             if (this.message.isPm()) {
                 return false;
             }
@@ -31,7 +29,6 @@ Custom URL has to be at least three characters long.`;
             let url   = matches.input.replace(matches[0], ''),
                 regex = /([A-Za-z0-9_-]+)/;
 
-            console.log(matches, url, regex, regex.test(url), url.length);
             if (!regex.test(url) || url.length < 3) {
                 return this.reply(
                     "Custom URL Provided is not valid. Make sure you are only using alphanumeric and dash/underscore characters and that the URL is at least 3 characters long."
@@ -58,9 +55,10 @@ Custom URL has to be at least three characters long.`;
                             return this.reply("Unable to set a URL at this time.");
                         }
 
-                        let newUrl = (this.container.getParameter('env') === 'dev'
-                                ? 'http://dev.discordservers.com/s/'
-                                : 'https://discservs.co/s/')
+                        console.log(this.container.getParameter('env'));
+                        let newUrl = (this.container.getParameter('env') !== 'dev'
+                                ? 'https://discservs.co/s/'
+                                : 'http://dev.discordservers.com/s/')
                             + url;
 
                         this.reply("Custom URL has been set. Your new URL is: <" + newUrl + ">");
