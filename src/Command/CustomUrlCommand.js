@@ -55,7 +55,7 @@ Custom URL has to be at least three characters long.`;
                             return this.reply("Unable to set a URL at this time.");
                         }
 
-                        let newUrl = 'https://discservs.co/s/' + url;
+                        let newUrl = 'http://discservs.co/s/' + url;
                         this.reply("Custom URL has been set. Your new URL is: <" + newUrl + ">");
                     })
                 })
