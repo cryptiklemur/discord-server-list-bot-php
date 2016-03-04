@@ -208,8 +208,8 @@ class InviteManager {
 
     checkInviteUpdate(server, callback) {
         InviteUpdate.find({serverId: server.id}, (error, requests) => {
-            let threeDaysAgo = new Date();
-            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+            let fifteenDaysAgo = new Date();
+            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
 
             if (requests.length === 0) {
                 let update = new InviteUpdate({serverId: server.id});
@@ -230,7 +230,7 @@ class InviteManager {
                 }
 
                 let request = requests[index];
-                if (request.insertDate <= threeDaysAgo) {
+                if (request.insertDate <= fifteenDaysAgo) {
                     request.remove();
                 } else {
                     return false;
@@ -246,7 +246,7 @@ class InviteManager {
         this.client.sendMessage(
             server.owner,
             `Hey there! Your server (${_.trim(server.name)}) is currently using an old invite code for \<http://discordservers.com\>. If you don't update this,
-we can't show your server.
+we can't show your server. If you don't wish to recieve these messages, either kick me form your server, or type \`|delist\` in your server.
 
 ***Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message \`Aaron\` in Discord Bots, or tweet \`@aequasi\` for help/issues.***
 
