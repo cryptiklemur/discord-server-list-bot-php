@@ -10,8 +10,7 @@ const env           = process.env;
 
 let options = {
     admin_id:  env.DISCORD_ADMIN_ID,
-    email:     env.DISCORD_EMAIL,
-    password:  env.DISCORD_PASSWORD,
+    token:     env.DISCORD_TOKEN,
     log_dir:   '/var/log/discord_bots',
     name:      pkg.name,
     version:   pkg.version,
