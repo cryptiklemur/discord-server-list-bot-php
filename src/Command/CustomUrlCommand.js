@@ -22,7 +22,7 @@ Custom URL has to be at least three characters long.`;
         });
 
         return this.responds(/^(custom(?:\s?url)?)\s/, matches => {
-            if (this.message.isPm()) {
+            if (this.isPm() || !this.isAdminOrOwner()) {
                 return false;
             }
 
@@ -44,7 +44,7 @@ Custom URL has to be at least three characters long.`;
                     return this.reply("That URL is already taken.");
                 }
 
-                Server.findOne({identifier: this.message.server.id}, (error, server) => {
+                Server.findOne({identifier: this.server.id}, (error, server) => {
                     if (error) {
                         return this.reply("Unable to set a URL at this time.");
                     }

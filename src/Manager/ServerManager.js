@@ -1,7 +1,7 @@
 const _            = require('lodash'),
       Server       = require('../Model/Server'),
       InviteUpdate = require('../Model/InviteUpdate'),
-      request      = require('request')
+      requestify   = require('request');
 
 const WAIT_TIME = .1;
 
@@ -39,15 +39,22 @@ class ServerManager {
         this.client     = client;
         this.logger     = logger;
         this.lastRun    = Math.round(new Date().getTime() / 1000);
-
     }
 
     sendToCarbon() {
-        return;
-        request.post('https://www.carbonitex.net/discord/data/botdata.php', {
-            key:         'aaron5492a645e0',
-            servercount: this.client.servers.length
-        })
+        requestify.post({
+            url:  'https://www.carbonitex.net/discord/data/botdata.php',
+            form: {
+                key:         'aaron5492a645e0',
+                servercount: this.client.servers.length
+            }
+        }, (error, response, body) => {
+            if (error) {
+                return this.logger.error("Error updating carbonitex");
+            }
+
+            this.logger.info("Server count changed. Updated carbonitex");
+        });
     }
 
     updateServer(dbServer, botServer) {

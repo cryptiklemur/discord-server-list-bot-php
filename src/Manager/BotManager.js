@@ -82,8 +82,13 @@ class BotManager {
 
     fetchBots() {
         return new Promise(resolve => {
-            let server = this.client.servers.get('id', BOT_SERVER_ID),
-                role   = server.roles.get('name', BOT_ROLE);
+            let server = this.client.servers.get('id', BOT_SERVER_ID), role;
+
+            if (!server) {
+                return;
+            }
+
+            role = server.roles.get('name', BOT_ROLE);
 
             this.bots = server.members.filter(user => this.client.memberHasRole(user, role));
             resolve(this.bots);
@@ -112,7 +117,7 @@ class BotManager {
                         return;
                     }
 
-                    let bot     = this.client.users.get('id', matches[1]);
+                    let bot = this.client.users.get('id', matches[1]);
 
                     if (bot === null) {
                         return;

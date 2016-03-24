@@ -8,7 +8,7 @@ class ViolateCommand extends AbstractCommand {
     static get description() { return 'Marks a server as disabled, and sends the given message to the owner.'; }
 
     handle() {
-        if (this.message.author.id !== this.client.admin.id) {
+        if (!this.isAdmin()) {
             return false;
         }
 

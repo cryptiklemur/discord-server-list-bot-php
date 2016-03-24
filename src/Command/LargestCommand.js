@@ -65,7 +65,7 @@ class LargestCommand extends AbstractCommand {
             message += msg + "\n";
         }
 
-        this.sendMessage(this.message.channel, message + "```");
+        this.reply(message + "```");
     }
 }
 

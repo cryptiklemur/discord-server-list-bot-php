@@ -8,7 +8,7 @@ class UpdateCommand extends AbstractCommand {
     static get description() { return 'Update a server id with a new invite code'}
 
     handle() {
-        if (!this.message.isPm() && this.message.server.id !== '115390342735331332') {
+        if (!this.isPm() && this.server.id !== '115390342735331332') {
             return false
         }
 
@@ -24,7 +24,7 @@ class UpdateCommand extends AbstractCommand {
                     return;
                 }
 
-                if (this.message.author.id !== server.owner.id && this.message.author.id !== this.client.admin.id) {
+                if (!this.isAdminOrOwner()) {
                     this.reply("You aren't the owner of this server.");
 
                     return;

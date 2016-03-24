@@ -34,7 +34,7 @@ class InviteCommand extends AbstractCommand {
             this.currentlyChecking[this.code] = true;
             this.client.getInvite(this.code, (error, info) => {
                 if (error) {
-                    if (this.message.isPm()) {
+                    if (this.isPm()) {
                         this.reply("That invite code is invalid. Please try a better one.");
                     }
 
@@ -51,8 +51,8 @@ class InviteCommand extends AbstractCommand {
                         return;
                     }
 
-                    if (this.message.isPm()) {
-                        if (this.message.author.id == CARBON_BOT_ID) {
+                    if (this.isPm()) {
+                        if (this.author.id == CARBON_BOT_ID) {
                             this.client.joinServer(this.code, (error, server) => {
                                 if (error) {
                                     this.logger.error(error);
@@ -71,7 +71,7 @@ class InviteCommand extends AbstractCommand {
                     }
 
                     InviteRequest.find(
-                        {serverId: info.server.id, authorId: this.message.author.id},
+                        {serverId: info.server.id, authorId: this.author.id},
                         (error, requests) => {
                             let fifteenDaysAgo = new Date();
                             fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
@@ -79,7 +79,7 @@ class InviteCommand extends AbstractCommand {
                             if (requests.length === 0) {
                                 let request = new InviteRequest({
                                     serverId: info.server.id,
-                                    authorId: this.message.author.id
+                                    authorId: this.author.id
                                 });
 
                                 return request.save(error => {
@@ -115,7 +115,7 @@ class InviteCommand extends AbstractCommand {
 
     sendInviteRequest() {
         this.sendMessage(
-            this.message.author,
+            this.author,
             `Hey there! I just saw you post your server link. Would you like to have it registered with the <http://www.discordservers.com> public server list? (Yes, or No)
 
  **Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message @Aaron in Discord Bots, or tweet @discservs for help/issues.**`
@@ -125,7 +125,7 @@ class InviteCommand extends AbstractCommand {
     }
 
     checkForReply(message) {
-        if (message.author !== this.message.author || message.channel.server !== undefined) {
+        if (message.author !== this.author || message.channel.server !== undefined) {
             return;
         }
 

@@ -11,12 +11,12 @@ class UpdateCommand extends AbstractCommand {
     }
 
     handle() {
-        if (this.message.isPm()) {
+        if (this.isPm()) {
             return false
         }
 
         return this.responds(/^delist$/i, (matches) => {
-            if (this.message.author.id !== this.message.server.owner.id) {
+            if (!this.isOwner()) {
                 this.reply("You aren't the owner of this server.");
 
                 return;
@@ -27,18 +27,18 @@ class UpdateCommand extends AbstractCommand {
                     confirmations = [];
                 }
 
-                if (confirmations.indexOf(this.message.server.id) >= 0) {
+                if (confirmations.indexOf(this.server.id) >= 0) {
                     this.reply(
                         "Alright! It should delist within the hour. If you want to be added back, just add me the same way you did before."
                     );
-                    setTimeout(() => this.client.leaveServer(this.message.server), 1000);
-                    confirmations.splice(confirmations.indexOf(this.message.server.id), 1);
+                    setTimeout(() => this.client.leaveServer(this.server), 1000);
+                    confirmations.splice(confirmations.indexOf(this.server.id), 1);
 
                     return;
                 }
 
                 this.reply("Are you sure you wan't to delist this server? If so, Just run this command again.");
-                confirmations.push(this.message.server.id);
+                confirmations.push(this.server.id);
 
                 this.brain.set('delist.confirmation', confirmations);
             });

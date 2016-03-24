@@ -6,12 +6,12 @@ class MessageCommand extends AbstractCommand {
     static get description() { return 'Message a server, or all servers.'; }
 
     handle() {
-        if (this.client.admin.id !== this.message.author.id) {
+        if (this.client.admin.id !== this.author.id) {
             return false;
         }
 
         this.responds(/^message server (\d+) (.*)/g, (matches) => {
-            if (!this.message.isPm()) {
+            if (!this.isPm()) {
                 return this.reply('Please pm this');
             }
 
@@ -19,7 +19,7 @@ class MessageCommand extends AbstractCommand {
         });
 
         this.responds(/^message servers (.*)/g, (matches) => {
-            if (!this.message.isPm()) {
+            if (!this.isPm()) {
                 return this.reply('Please pm this');
             }
 

@@ -5,18 +5,8 @@ const Bot           = require('./Bot');
 const InviteManager = require('./Manager/InviteManager');
 const ServerManager = require('./Manager/ServerManager');
 const BotManager    = require('./Manager/BotManager');
-const Commands      = require('require-all')(__dirname + '/Command/');
 const es            = require('elasticsearch');
 const env           = process.env;
-
-let commands = [];
-for (let name in Commands) {
-    if (Commands.hasOwnProperty(name)) {
-        if (name !== 'AbstractCommand') {
-            commands.push(Commands[name]);
-        }
-    }
-}
 
 let options = {
     admin_id:  env.DISCORD_ADMIN_ID,
@@ -26,7 +16,7 @@ let options = {
     name:      pkg.name,
     version:   pkg.version,
     author:    pkg.author,
-    commands:  commands,
+    modules:   [require('./DSLModule')],
     status:    'http://discservs.co',
     prefix:    "|",
     redis_url: env.DISCORD_REDIS_URL,
@@ -43,25 +33,19 @@ let options = {
                 }
             },
             services:   {
+                search:           {module: es.Client, args: ['%elasticsearch%']},
                 'manager.invite': {
                     module: InviteManager,
-                    args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}]
+                    args:   ['@dispatcher', '@client', '@logger']
                 },
                 'manager.server': {
                     module: ServerManager,
-                    args:   [{$ref: 'dispatcher'}, {$ref: 'client'}, {$ref: 'logger'}]
+                    args:   ['@dispatcher', '@client', '@logger']
                 },
                 'manager.bot':    {
                     module: BotManager,
-                    args:   [
-                        {$ref: 'dispatcher'},
-                        {$ref: 'client'},
-                        {$ref: 'logger'},
-                        {$ref: 'helper.channel'},
-                        {$ref: 'helper.ignore'}
-                    ]
-                },
-                search:           {module: es.Client, args: ['%elasticsearch%']}
+                    args:   ['@dispatcher', '@client', '@logger', '@helper.channel', '@helper.ignore']
+                }
             }
         };
     }

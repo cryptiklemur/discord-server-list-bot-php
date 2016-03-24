@@ -77,9 +77,9 @@ class FindCommand extends AbstractCommand {
         }
 
         if (added > 0) {
-            this.sendMessage(this.message.channel, message + "", delay);
+            this.reply(message + "", delay);
         } else {
-            this.sendMessage(this.message.channel, "I couldn't find any servers");
+            this.reply("I couldn't find any servers");
         }
     }
 }

@@ -12,11 +12,11 @@ class PremiumCommand extends AbstractCommand {
 
     handle() {
         this.responds(/^premium$/g, () => {
-            if (this.message.isPm()) {
+            if (this.isPm()) {
                 return;
             }
 
-            Server.findOne({identifier: this.message.server.id}, (error, server) => {
+            Server.findOne({identifier: this.server.id}, (error, server) => {
                 if (error) {
                     return this.logger.error(error);
                 }
