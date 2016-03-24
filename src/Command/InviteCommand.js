@@ -140,7 +140,14 @@ class InviteCommand extends AbstractCommand {
         }
 
         if (content === 'yes') {
-            this.reply("Awesome! Click on this link to add it to the server! https://discordapp.com/oauth2/authorize?&client_id=162469056312639488&scope=bot");
+            this.sendMessage(
+                message.author,
+                `Awesome! Click on this link to add it to the server!
+
+                https://discordapp.com/oauth2/authorize?&client_id=162469056312639488&scope=bot
+
+If you don't have the Manage Server permission, pass this link along to your server administrator.`
+            );
         } else {
             this.sendMessage(message.author, 'Alright, if you change your mind, just send me a link again.');
         }
