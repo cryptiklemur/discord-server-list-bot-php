@@ -40,9 +40,6 @@ class ServerManager {
         this.logger     = logger;
         this.lastRun    = Math.round(new Date().getTime() / 1000);
 
-        this.sendToCarbon();
-        this.client.on('serverCreated', this.sendToCarbon.bind(this));
-        this.client.on('serverDeleted', this.sendToCarbon.bind(this));
     }
 
     sendToCarbon() {
@@ -130,6 +127,10 @@ class ServerManager {
     }
 
     manage() {
+        this.sendToCarbon();
+        this.client.on('serverCreated', this.sendToCarbon.bind(this));
+        this.client.on('serverDeleted', this.sendToCarbon.bind(this));
+
         // Loop through servers in database, check if bot is in the server, also check if invite link is working
         // Loop through servers bot is connected to, check if server is in the database
         // After each server, wait 5 seconds (should be configurable)
