@@ -43,6 +43,7 @@ class ServerManager {
     }
 
     sendToCarbon() {
+        return;
         request.post('https://www.carbonitex.net/discord/data/botdata.php', {
             key:         'aaron5492a645e0',
             servercount: this.client.servers.length
