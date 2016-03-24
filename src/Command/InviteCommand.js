@@ -140,41 +140,7 @@ class InviteCommand extends AbstractCommand {
         }
 
         if (content === 'yes') {
-            this.sendMessage(message.author, 'Awesome! I\'ll add it to the list in the next few minutes.');
-
-            this.client.joinServer(this.code, (error, server) => {
-                if (error) {
-                    return this.logger.error("Error for " + server.id, error);
-                }
-
-                Server.findOne({identifier: server.id}, (error, dbServer) => {
-                    if (error) {
-                        return this.logger.error(error);
-                    }
-
-                    if (!dbServer) {
-                        dbServer = new Server({identifier: server.id, inviteCode: this.code});
-                    }
-
-                    dbServer.save(error => {
-                        if (error) {
-                            return this.logger.error(error);
-                        }
-
-                        this.sendMessage(server, `Hey there! I was invited by ${message.author.mention()}. To see what I do, send me a \`help\` private message, or type \`|help\`.`);
-
-                        if (server.owner.id !== message.author.id) {
-                            this.sendMessage(
-                                server.owner,
-                                `Hey there. I was invited to ${server.name} by ${message.author.username}. I am a bot for <http://discordservers.com/>.
-**This bot is not affiliated with discord, in any way.** If you have any questions about the bot, try sending a \`help\` message, or tweet @aequasi.
-
-If you don't want the bot on your server, type \`|delist\` in your server.`
-                            );
-                        }
-                    });
-                });
-            });
+            this.reply("Awesome! Click on this link to add it to the server! https://discordapp.com/oauth2/authorize?&client_id=162469056312639488&scope=bot");
         } else {
             this.sendMessage(message.author, 'Alright, if you change your mind, just send me a link again.');
         }
