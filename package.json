@@ -1,16 +1,16 @@
 {
-    "name":         "discord-server-list-bot",
-    "version":      "1.0.0",
-    "private":      true,
-    "author":       "Aaron Scherer <aequasi@gmail.com>",
-    "description":  "A semi-helpful bot for discord-server-list",
-    "dependencies": {
-        "discord-bot-base": "^3.4",
-        "discord.js":       "hydrabolt/discord.js#indev",
-        "elasticsearch":    "^10.1.3",
-        "moment":           "^2.10",
-        "prettyjson":       "^1.1",
-        "request":          "^2.67",
-        "walk":             "^2.3"
-    }
+  "name": "discord-server-list-bot",
+  "version": "1.0.0",
+  "private": true,
+  "author": "Aaron Scherer <aequasi@gmail.com>",
+  "description": "A semi-helpful bot for discord-server-list",
+  "dependencies": {
+    "discord-bot-base": "^3.4",
+    "discord.js": "hydrabolt/discord.js#indev",
+    "elasticsearch": "^10.1.3",
+    "moment": "^2.10",
+    "prettyjson": "^1.1",
+    "request": "^2.67",
+    "walk": "^2.3"
+  }
 }

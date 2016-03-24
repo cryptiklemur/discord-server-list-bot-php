@@ -1,6 +1,7 @@
-const _            = require('lodash');
-const Server       = require('../Model/Server');
-const InviteUpdate = require('../Model/InviteUpdate');
+const _            = require('lodash'),
+      Server       = require('../Model/Server'),
+      InviteUpdate = require('../Model/InviteUpdate'),
+      request      = require('request')
 
 const WAIT_TIME = .1;
 
@@ -26,7 +27,7 @@ function makeIterator(array) {
         push:    function (item) {
             array.push(item);
         },
-        all: function () {
+        all:     function () {
             return array;
         }
     }
@@ -38,6 +39,17 @@ class ServerManager {
         this.client     = client;
         this.logger     = logger;
         this.lastRun    = Math.round(new Date().getTime() / 1000);
+
+        this.sendToCarbon();
+        this.client.on('serverCreated', this.sendToCarbon.bind(this));
+        this.client.on('serverDeleted', this.sendToCarbon.bind(this));
+    }
+
+    sendToCarbon() {
+        request.post('https://www.carbonitex.net/discord/data/botdata.php', {
+            key:         'aaron5492a645e0',
+            servercount: this.client.servers.length
+        })
     }
 
     updateServer(dbServer, botServer) {
