@@ -245,7 +245,7 @@ class InviteManager {
     sendUpdateRequest(server) {
         this.client.sendMessage(
             server.owner,
-            `Hey there! Your server (${_.trim(server.name)}) is currently using an old invite code for \<http://discordservers.com\>. If you don't update this,
+            `Hey there! Your server (${_.trim(server.name)}) is currently has either no invite code, or an old invite code for \<http://discordservers.com\>. If you don't update this,
 we can't show your server. If you don't wish to recieve these messages, either kick me form your server, or type \`|delist\` in your server.
 
 ***Notice: This bot is not affiliated with Discord, and is an unofficial bot. Message \`Aaron\` in Discord Bots, or tweet \`@aequasi\` for help/issues.***
