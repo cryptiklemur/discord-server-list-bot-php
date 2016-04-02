@@ -166,26 +166,30 @@ class InviteManager {
     }
 
     getNewInviteCode(server, successCallback, unchangedCallback) {
-        this.client.getInvites(server, (error, invites) => {
-            if (error || !invites || invites.length < 1) {
-                if (!server.defaultChannel) {
-                    return unchangedCallback();
-                }
-
-                return this.client.createInvite(server.defaultChannel.id, {temporary: false}, (error, invite) => {
-                    if (error || !invite) {
-                        return this.checkInviteUpdate(server, unchangedCallback);
+        this.client.getInvites(server)
+            .catch(this.logger.error)
+            .then(invites => {
+                if (error || !invites || invites.length < 1) {
+                    if (!server.defaultChannel) {
+                        return unchangedCallback();
                     }
 
-                    successCallback(invite);
-                });
-            }
+                    return this.client.createInvite(server.defaultChannel.id, {temporary: false})
+                        .catch(() => this.checkInviteUpdate(server, unchangedCallback))
+                        .then(invite => {
+                            if (!invite) {
+                                return this.checkInviteUpdate(server, unchangedCallback);
+                            }
 
-            let invite = this.getBestInvite(invites);
-            if (invite !== null) {
-                return successCallback(invite);
-            }
-        }).catch(this.logger.error);
+                            successCallback(invite);
+                        });
+                }
+
+                let invite = this.getBestInvite(invites);
+                if (invite !== null) {
+                    return successCallback(invite);
+                }
+            });
     }
 
     getBestInvite(invites) {
