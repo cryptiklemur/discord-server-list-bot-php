@@ -32,83 +32,69 @@ class InviteCommand extends AbstractCommand {
             }
 
             this.currentlyChecking[this.code] = true;
-            this.client.getInvite(this.code, (error, info) => {
-                if (error) {
+            this.client.getInvite(this.code)
+                .catch(error => {
                     if (this.isPm()) {
                         this.reply("That invite code is invalid. Please try a better one.");
                     }
 
                     this.logger.error(error);
-                    return;
-                }
-
-                if (this.client.servers.get('id', info.server.id)) {
-                    return;
-                }
-
-                Server.findOne({identifier: info.server.id}, (error, server) => {
-                    if (error || server) {
+                })
+                .then(info => {
+                    if (this.client.servers.get('id', info.server.id)) {
                         return;
                     }
 
-                    if (this.isPm()) {
-                        if (this.author.id == CARBON_BOT_ID) {
-                            this.client.joinServer(this.code, (error, server) => {
-                                if (error) {
-                                    this.logger.error(error);
-                                }
-                                this.reply("Success!");
-
-                                this.sendMessage(server, `Meep Morp, Hey there! I was invited by someone who used the Carbon website. To see what I do, send me a \`help\` private message, or type \`|help\`.`);
-                            });
-
+                    Server.findOne({identifier: info.server.id}, (error, server) => {
+                        if (error || server) {
                             return;
                         }
 
-                        this.client.on('message', this.checkForReply);
+                        if (this.isPm()) {
+                            this.client.on('message', this.checkForReply);
 
-                        return this.reply("Meep Morp, hey! Would you like to list this server? (Yes, or No)");
-                    }
+                            return this.reply("Meep Morp, hey! Would you like to list this server? (Yes, or No)");
+                        }
 
-                    InviteRequest.find(
-                        {serverId: info.server.id, authorId: this.author.id},
-                        (error, requests) => {
-                            let fifteenDaysAgo = new Date();
-                            fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+                        InviteRequest.find(
+                            {serverId: info.server.id, authorId: this.author.id},
+                            (error, requests) => {
+                                let fifteenDaysAgo = new Date();
+                                fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
 
-                            if (requests.length === 0) {
-                                let request = new InviteRequest({
-                                    serverId: info.server.id,
-                                    authorId: this.author.id
-                                });
+                                if (requests.length === 0) {
+                                    let request = new InviteRequest({
+                                        serverId: info.server.id,
+                                        authorId: this.author.id
+                                    });
 
-                                return request.save(error => {
-                                    if (error) {
-                                        return this.logger.error(error);
+                                    return request.save(error => {
+                                        if (error) {
+                                            return this.logger.error(error);
+                                        }
+
+                                        this.sendInviteRequest();
+                                    })
+                                }
+
+                                for (let index in requests) {
+                                    if (!requests.hasOwnProperty(index)) {
+                                        continue;
                                     }
 
-                                    this.sendInviteRequest();
-                                })
-                            }
-
-                            for (let index in requests) {
-                                if (!requests.hasOwnProperty(index)) {
-                                    continue;
+                                    let request = requests[index];
+                                    if (request.insertDate <= fifteenDaysAgo) {
+                                        request.remove();
+                                    } else {
+                                        return false;
+                                    }
                                 }
 
-                                let request = requests[index];
-                                if (request.insertDate <= fifteenDaysAgo) {
-                                    request.remove();
-                                } else {
-                                    return false;
-                                }
+                                this.sendInviteRequest();
                             }
-
-                            this.sendInviteRequest();
-                        }
-                    )
-                })
-            });
+                        )
+                    })
+                });
         })
 
     }
