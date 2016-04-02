@@ -20,7 +20,7 @@ class InviteCommand extends AbstractCommand {
     }
 
     handle() {
-        return this.hears(/https:\/\/discord\.gg\/(.*)/g, (matches) => {
+        return this.hears(/https:\/\/discord\.gg\/([A-Za-z0-9-]+)/g, (matches) => {
             if (matches[0].indexOf('update') === 0) {
                 return;
             }
