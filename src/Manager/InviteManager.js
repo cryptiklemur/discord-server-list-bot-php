@@ -69,8 +69,9 @@ class InviteManager {
 
                 //this.logger.debug("Updating server: ", dbServer.name);
 
-                this.client.getInvite(dbServer.inviteCode, (error, invite) => {
-                    if (error) {
+                this.client.getInvite(dbServer.inviteCode)
+                    .then(invite => resolve)
+                    .catch(error => {
                         this.logger.debug("Server's invite code is invalid or expired.");
 
                         return this.getNewInviteCode(
@@ -101,10 +102,7 @@ class InviteManager {
                                 });
                             }
                         );
-                    }
-
-                    return resolve();
-                });
+                    })
             });
         });
     }
