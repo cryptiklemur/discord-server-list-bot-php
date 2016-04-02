@@ -53,7 +53,9 @@ class BotManager {
             this.lastRun = Math.round(new Date().getTime() / 1000);
 
             this.fetchBots().then(() => {
-                this.ignoreHelper.batchIgnore('user', this.bots.map(bot => bot.id), this.logger.info);
+                this.bots.forEach(bot => {
+                    this.ignoreHelper.ignore('user', bot.id).then(this.logger.info, this.logger.error);
+                });
 
                 this.updateBots();
             }).catch(error => {
