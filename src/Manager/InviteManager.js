@@ -169,7 +169,7 @@ class InviteManager {
         this.client.getInvites(server)
             .catch(this.logger.error)
             .then(invites => {
-                if (error || !invites || invites.length < 1) {
+                if (!invites || invites.length < 1) {
                     if (!server.defaultChannel) {
                         return unchangedCallback();
                     }
