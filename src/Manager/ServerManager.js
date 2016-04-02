@@ -131,7 +131,11 @@ class ServerManager {
 
         this.updateServer(dbServer, botServer)
             .then(() => setTimeout(this.updateNextServer.bind(this), 1000 * WAIT_TIME))
-            .catch(() => setTimeout(this.updateNextServer.bind(this), 1));
+            .catch(error => {
+                setTimeout(this.updateNextServer.bind(this), 1);
+                this.logger.error(error);
+                this.logger.error(error.stack);
+            });
     }
 
     manage() {
@@ -152,6 +156,7 @@ class ServerManager {
                         this.updateNextServer();
                     })
                     .catch(error => {
+                        console.error(error);
                         console.error(error.stack);
                     })
             });

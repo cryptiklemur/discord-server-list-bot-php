@@ -41,6 +41,10 @@ class InviteManager {
     }
 
     updateServer(dbServer, botServer) {
+        if (!dbServer && !botServer) {
+            throw new Error("dbServer and botServer empty")
+        }
+
         if (!dbServer) {
             return Server.findOne({identifier: botServer.id}, (error, server) => {
                 if (error) {
@@ -166,6 +170,10 @@ class InviteManager {
     getNewInviteCode(server, successCallback, unchangedCallback) {
         this.client.getInvites(server, (error, invites) => {
             if (error || !invites || invites.length < 1) {
+                if (!server.defaultChannel) {
+                    return unchangedCallback();
+                }
+
                 return this.client.createInvite(server.defaultChannel.id, {temporary: false}, (error, invite) => {
                     if (error || !invite) {
                         return this.checkInviteUpdate(server, unchangedCallback);
@@ -179,7 +187,7 @@ class InviteManager {
             if (invite !== null) {
                 return successCallback(invite);
             }
-        });
+        }).catch(this.logger.error);
     }
 
     getBestInvite(invites) {
@@ -207,6 +215,11 @@ class InviteManager {
     }
 
     checkInviteUpdate(server, callback) {
+        if (!server.id) {
+            console.log(server);
+            throw new Error("Server doesn't have an ID?");
+        }
+
         InviteUpdate.find({serverId: server.id}, (error, requests) => {
             let fifteenDaysAgo = new Date();
             fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
