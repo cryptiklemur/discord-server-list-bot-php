@@ -54,7 +54,10 @@ class BotManager {
 
             this.fetchBots().then(() => {
                 this.bots.forEach(bot => {
-                    this.ignoreHelper.ignore('user', bot.id).then(this.logger.debug, this.logger.error);
+                    this.ignoreHelper.ignore('user', bot.id).then(
+                        ignored => this.logger.debug('Ignored User: ' + ignored.id),
+                        this.logger.error
+                    );
                 });
 
                 this.updateBots();
@@ -113,59 +116,59 @@ class BotManager {
                 console.error(error.stack);
             })
             .then(bots => {
-            this.getBotList(botList => {
-                botList.forEach(item => {
-                    let regex   = /^\d+:\s<@(\d+)>\s+by\s+(?:(?:<@)?(unknown|\d+)>?)\s+\|\s+\*\*([A-Za-z0-9\.\s\+\-]+)\*\*(?:\s+\|\s+(.+))?$/,
-                        matches = regex.exec(item);
+                this.getBotList(botList => {
+                    botList.forEach(item => {
+                        let regex   = /^\d+:\s<@(\d+)>\s+by\s+(?:(?:<@)?(unknown|\d+)>?)\s+\|\s+\*\*([A-Za-z0-9\.\s\+\-]+)\*\*(?:\s+\|\s+(.+))?$/,
+                            matches = regex.exec(item);
 
-                    if (!matches) {
-                        return;
-                    }
-
-                    let bot = this.client.users.get('id', matches[1]);
-
-                    if (bot === null) {
-                        return;
-                    }
-
-                    let changed = false;
-                    Bot.findOne({identifier: bot.id}, (error, dbBot) => {
-                        if (error) {
-                            return this.logger.error(error);
+                        if (!matches) {
+                            return;
                         }
 
-                        if (!dbBot) {
-                            dbBot   = new Bot({identifier: bot.id, name: bot.name});
-                            changed = true;
+                        let bot = this.client.users.get('id', matches[1]);
+
+                        if (bot === null) {
+                            return;
                         }
 
-                        if (matches[2] !== 'unknown') {
-                            let owner = this.client.users.get('id', matches[2]);
-                            if (owner !== null) {
-                                dbBot.owner = owner.id;
+                        let changed = false;
+                        Bot.findOne({identifier: bot.id}, (error, dbBot) => {
+                            if (error) {
+                                return this.logger.error(error);
+                            }
+
+                            if (!dbBot) {
+                                dbBot   = new Bot({identifier: bot.id, name: bot.name});
+                                changed = true;
+                            }
+
+                            if (matches[2] !== 'unknown') {
+                                let owner = this.client.users.get('id', matches[2]);
+                                if (owner !== null) {
+                                    dbBot.owner = owner.id;
+                                    changed     = true;
+                                }
+                            }
+
+                            if (matches[3] !== 'unknown') {
+                                dbBot.library = matches[3];
+                                changed       = true;
+                            }
+
+                            if (matches[4] !== undefined) {
+                                dbBot.notes = matches[4];
                                 changed     = true;
                             }
-                        }
 
-                        if (matches[3] !== 'unknown') {
-                            dbBot.library = matches[3];
-                            changed       = true;
-                        }
-
-                        if (matches[4] !== undefined) {
-                            dbBot.notes = matches[4];
-                            changed     = true;
-                        }
-
-                        if (changed) {
-                            dbBot.save();
-                        }
+                            if (changed) {
+                                dbBot.save();
+                            }
+                        });
                     });
-                });
 
-                this.dispatcher.emit('manager.bot.done');
-            });
-        })
+                    this.dispatcher.emit('manager.bot.done');
+                });
+            })
     }
 
     updateBot(bot) {
