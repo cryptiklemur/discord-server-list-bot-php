@@ -107,7 +107,12 @@ class BotManager {
 
     updateBots() {
         let requests = this.bots.map(this.updateBot.bind(this));
-        Promise.all(requests).then(bots => {
+        Promise.all(requests)
+            .catch(error => {
+                this.logger.error(error);
+                console.error(error.stack);
+            })
+            .then(bots => {
             this.getBotList(botList => {
                 botList.forEach(item => {
                     let regex   = /^\d+:\s<@(\d+)>\s+by\s+(?:(?:<@)?(unknown|\d+)>?)\s+\|\s+\*\*([A-Za-z0-9\.\s\+\-]+)\*\*(?:\s+\|\s+(.+))?$/,
