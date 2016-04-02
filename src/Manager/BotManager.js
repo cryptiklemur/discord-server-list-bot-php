@@ -54,7 +54,7 @@ class BotManager {
 
             this.fetchBots().then(() => {
                 this.bots.forEach(bot => {
-                    this.ignoreHelper.ignore('user', bot.id).then(this.logger.info, this.logger.error);
+                    this.ignoreHelper.ignore('user', bot.id).then(this.logger.debug, this.logger.error);
                 });
 
                 this.updateBots();
