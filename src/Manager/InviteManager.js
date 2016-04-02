@@ -157,7 +157,7 @@ class InviteManager {
         this.dispatcher.emit('manager.invite.start');
 
         setInterval(() => {
-            let currentTime = Math.round(new Date().getTime() / 1000) - 60;
+            let currentTime = Math.round(new Date().getTime() / 1000) - 360;
             if (currentTime - this.lastRun >= 0) {
                 this.logger.info("Manager died. Starting up again.");
                 this.dispatcher.emit('manager.invite.start');
