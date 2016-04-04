@@ -41,7 +41,8 @@ class InviteCommand extends AbstractCommand {
                     this.logger.error(error);
                 })
                 .then(info => {
-                    if (!info.server) {
+                    if (!info || !info.server) {
+                        this.logger.error(arguments);
                         this.logger.error('Somehow, no server id.');
 
                         return;
