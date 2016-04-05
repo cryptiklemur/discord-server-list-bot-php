@@ -40,7 +40,7 @@ class ServerManager {
         this.logger     = logger;
         this.lastRun    = Math.round(new Date().getTime() / 1000);
 
-        this.sendToCarbon = _.throttle(this.sendToCarbon, 1000);
+        this.sendToCarbon = _.throttle(this.sendToCarbon, 6 * 60 * 1000);
     }
 
     sendToCarbon() {
