@@ -44,6 +44,8 @@ class ServerManager {
     }
 
     sendToCarbon() {
+        return
+
         requestify.post({
             url:  'https://www.carbonitex.net/discord/data/botdata.php',
             form: {
