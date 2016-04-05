@@ -9,21 +9,22 @@ const es            = require('elasticsearch');
 const env           = process.env;
 
 let options = {
-    admin_id:  env.DISCORD_ADMIN_ID,
-    token:     env.DISCORD_TOKEN,
-    log_dir:   '/var/log/discord_bots',
-    name:      pkg.name,
-    version:   pkg.version,
-    author:    pkg.author,
-    modules:   [require('./DSLModule')],
-    status:    'http://discservs.co',
-    prefix:    "|",
-    redis_url: env.DISCORD_REDIS_URL,
-    mongo_url: env.DISCORD_MONGO_URL,
-    queue:     {
+    admin_id:      env.DISCORD_ADMIN_ID,
+    token:         env.DISCORD_TOKEN,
+    log_dir:       '/var/log/discord_bots',
+    name:          pkg.name,
+    version:       pkg.version,
+    author:        pkg.author,
+    modules:       [require('./DSLModule')],
+    status:        'http://discservs.co',
+    loaderTimeout: 240,
+    prefix:        "|",
+    redis_url:     env.DISCORD_REDIS_URL,
+    mongo_url:     env.DISCORD_MONGO_URL,
+    queue:         {
         host: env.DISCORD_RABBIT_HOST
     },
-    container: (Bot) => {
+    container:     (Bot) => {
         return {
             parameters: {
                 elasticsearch: {

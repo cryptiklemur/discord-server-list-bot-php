@@ -39,6 +39,8 @@ class ServerManager {
         this.client     = client;
         this.logger     = logger;
         this.lastRun    = Math.round(new Date().getTime() / 1000);
+
+        this.sendToCarbon = _.throttle(this.sendToCarbon, 1000);
     }
 
     sendToCarbon() {

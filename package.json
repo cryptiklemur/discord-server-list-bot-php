@@ -12,5 +12,8 @@
     "prettyjson": "^1.1",
     "request": "^2.67",
     "walk": "^2.3"
+  },
+  "devDependencies": {
+    "node-stopwatch": "0.0.1"
   }
 }
