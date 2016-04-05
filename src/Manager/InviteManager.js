@@ -220,6 +220,8 @@ class InviteManager {
     }
 
     checkInviteUpdate(server, callback) {
+        callback = typeof callback === 'function' ? callback : () => {};
+
         if (!server.id) {
             console.log(server);
             throw new Error("Server doesn't have an ID?");
