@@ -136,6 +136,9 @@ class InviteManager {
     }
 
     manage() {
+        this.client.on('serverCreated', this.checkInviteUpdate.bind(this));
+
+
         // Loop through servers in database, check if bot is in the server, also check if invite link is working
         // Loop through servers bot is connected to, check if server is in the database
         // After each server, wait 5 seconds (should be configurable)
