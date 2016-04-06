@@ -34,7 +34,7 @@ class MessageCommand extends AbstractCommand {
             return false;
         }
 
-        this.client.sendMessage(server.owner, message);
+        this.sendMessage(server.owner, message);
 
         return true;
     }

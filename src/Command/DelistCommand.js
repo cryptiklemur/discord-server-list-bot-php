@@ -31,7 +31,7 @@ class UpdateCommand extends AbstractCommand {
                     this.reply(
                         "Alright! It should delist within the hour. If you want to be added back, just add me the same way you did before."
                     );
-                    setTimeout(() => this.client.leaveServer(this.server), 1000);
+                    setTimeout(() => this.client.leaveServer(this.server).catch(this.logger.error), 1000);
                     confirmations.splice(confirmations.indexOf(this.server.id), 1);
 
                     return;

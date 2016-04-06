@@ -221,6 +221,9 @@ class InviteManager {
 
     checkInviteUpdate(server, callback) {
         callback = typeof callback === 'function' ? callback : () => {};
+        if (server.inviteCode) {
+            return;
+        }
 
         if (!server.id) {
             console.log(server);
@@ -263,6 +266,7 @@ class InviteManager {
     }
 
     sendUpdateRequest(server) {
+        this.logger.debug("Sending update request to " + server.name);
         this.client.sendMessage(
             server.owner,
             `Hey there! Your server (${_.trim(server.name)}) is currently has either no invite code, or an old invite code for \<http://discordservers.com\>. If you don't update this,
@@ -275,7 +279,7 @@ Please reply with a new invite link (preferably a permanent link), in the follow
 \`\`\`
 update ${server.id} <new invite url>
 \`\`\``
-        );
+        ).catch(this.logger.error);
     }
 }
 

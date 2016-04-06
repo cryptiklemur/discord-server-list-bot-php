@@ -44,8 +44,6 @@ class ServerManager {
     }
 
     sendToCarbon() {
-        return
-
         requestify.post({
             url:  'https://www.carbonitex.net/discord/data/botdata.php',
             form: {
@@ -72,18 +70,20 @@ class ServerManager {
             })
         }
 
-        if (!botServer) {
+        if (!botServer.id) {
             botServer = this.client.servers.get('id', dbServer.identifier);
         }
 
         return new Promise((resolve, reject) => {
+            let owner = botServer.owner === null ? {} : {id: botServer.owner.id, name: botServer.owner.username};
+
             dbServer.name         = botServer.name;
             dbServer.region       = botServer.region;
             dbServer.members      = botServer.members.length;
             dbServer.online       = botServer.members.filter(user => user.status != 'offline').length;
             dbServer.icon         = botServer.iconURL;
             dbServer.enabled      = true;
-            dbServer.owner        = {id: botServer.owner.id, name: botServer.owner.username};
+            dbServer.owner        = owner;
             dbServer.modifiedDate = Date.now();
 
             dbServer.save(error => {
@@ -142,8 +142,28 @@ class ServerManager {
             });
     }
 
+    serverJoined(server) {
+        Server.findOne({identifier: server.id}, (error, dbServer) => {
+            if (error) {
+                return this.logger.error(error);
+            }
+
+            if (dbServer && !dbServer.enabled) {
+                dbServer.enabled = true;
+                dbServer.private = false;
+
+                dbServer.save(error => {
+                    if (error) {
+                        this.logger.error(error);
+                    }
+                });
+            }
+        })
+    }
+
     manage() {
         this.sendToCarbon();
+        this.client.on('serverCreated', this.serverJoined.bind(this));
         this.client.on('serverCreated', this.sendToCarbon.bind(this));
         this.client.on('serverDeleted', this.sendToCarbon.bind(this));
 
@@ -153,7 +173,7 @@ class ServerManager {
 
         this.dispatcher.on('manager.server.start', () => {
             this.logger.info("Starting server manager");
-            Server.find({}, (error, servers) => {
+            Server.find({enabled: true}, (error, servers) => {
                 this.servers = makeIterator(_.shuffle(servers));
                 this.checkConnectedServers()
                     .then(() => {
@@ -183,19 +203,22 @@ class ServerManager {
         }, 5000)
     }
 
-    checkConnectedServers() {
+    checkConnectedServers(servers) {
+        servers = servers === undefined ? this.client.servers : servers;
+
         return new Promise(resolve => {
-            for (let index in this.client.servers) {
+            for (let index in servers) {
                 if (!this.client.servers.hasOwnProperty(index) || index === 'length' || index === 'limit') {
                     continue;
                 }
 
-                let server = this.client.servers[index];
-                if (this.servers.all().find(dbServer => dbServer.identifier === server.id)) {
+                let server = servers[index];
+                if (this.servers && this.servers.all().find(dbServer => dbServer.identifier === server.id)) {
                     continue;
                 }
 
                 this.logger.debug(`Bot is connected to ${server.name} but it isn't in the database.`);
+                let owner = server.owner === null ? {} : {id: server.owner.id, name: server.owner.username};
 
                 let dbServer = new Server({
                     name:       server.name,
@@ -204,7 +227,7 @@ class ServerManager {
                     members:    server.members.length,
                     online:     server.members.filter(user => user.status != 'offline').length,
                     icon:       server.iconURL,
-                    owner:      {id: server.owner.id, name: server.owner.username}
+                    owner:      owner
                 });
 
                 dbServer.save(error => {

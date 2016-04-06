@@ -37,7 +37,7 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                         return;
                     }
 
-                    this.client.leaveServer(server);
+                    this.client.leaveServer(server).catch(this.logger.error);
                     dbServer.remove(error => {
                         if (error) {
                             this.logger.error(error);
@@ -46,11 +46,11 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                         }
 
                         let owner = this.client.users.get('id', dbServer.owner.id);
-                        this.client.sendMessage(owner, message);
+                        this.sendMessage(owner, message);
 
                         let reply = `Sent owner of ${dbServer.name} (${owner.name}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
                         this.logger.info(reply);
-                        this.client.sendMessage(this.client.admin, reply);
+                        this.sendMessage(this.client.admin, reply);
                     });
                 });
             });

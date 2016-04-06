@@ -5,13 +5,11 @@
   "author": "Aaron Scherer <aequasi@gmail.com>",
   "description": "A semi-helpful bot for discord-server-list",
   "dependencies": {
-    "discord-bot-base": "^5.0.9",
-    "discord.js": "hydrabolt/discord.js#indev",
+    "discord-bot-base": "^5.0.17",
     "elasticsearch": "^10.1.3",
     "moment": "^2.10",
     "prettyjson": "^1.1",
-    "request": "^2.67",
-    "walk": "^2.3"
+    "request": "^2.70.0"
   },
   "devDependencies": {
     "node-stopwatch": "0.0.1"
