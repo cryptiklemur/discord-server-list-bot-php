@@ -1,23 +1,30 @@
-const BaseBot = require('discord-bot-base').Bot;
+const BaseBot    = require('discord-bot-base').Bot,
+      _          = require('lodash'),
+      requestify = require('request');
 
 class Bot extends BaseBot {
     onReady() {
         super.onReady();
 
-        let client = this.container.get('client');
-        let interval = setInterval(() => {
-            let goodServers = client.servers.filter(server => server.name);
+        this.sendToCarbon = _.throttle(this.sendToCarbon, 6 * 60 * 1000);
 
-            console.log(goodServers.length, client.servers.length);
-            if (goodServers.length === client.servers.length) {
-                clearInterval(interval);
-                this.logger.info("Starting managers");
-                this.container.get('manager.bot').manage();
-                this.container.get('manager.server').manage();
-                this.container.get('manager.invite').manage();
+        this.container.get('client').on('serverCreated', this.container.get('factory.manager.server').create);
+    }
+
+    sendToCarbon() {
+        requestify.post({
+            url:  'https://www.carbonitex.net/discord/data/botdata.php',
+            form: {
+                key:         process.env.DISCORD_CARBON_KEY,
+                servercount: this.container.get('client').servers.length
             }
-        }, 50);
+        }, (error, response, body) => {
+            if (error) {
+                return this.logger.error("Error updating carbonitex");
+            }
 
+            this.logger.info("Server count changed. Updated carbonitex");
+        });
     }
 }
 

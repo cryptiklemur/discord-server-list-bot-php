@@ -1,12 +1,12 @@
 'use strict';
 
-const pkg           = require('../package');
-const Bot           = require('./Bot');
-const InviteManager = require('./Manager/InviteManager');
-const ServerManager = require('./Manager/ServerManager');
-const BotManager    = require('./Manager/BotManager');
-const es            = require('elasticsearch');
-const env           = process.env;
+const pkg                  = require('../package'),
+      Bot                  = require('./Bot'),
+      InviteChecker        = require('./Checker/InviteChecker'),
+      ServerListener       = require('./Listener/ServerListener'),
+      ServerManagerFactory = require('./Factory/Manager/ServerManagerFactory'),
+      es                   = require('elasticsearch'),
+      env                  = process.env;
 
 let options = {
     admin_id:      env.DISCORD_ADMIN_ID,
@@ -33,19 +33,10 @@ let options = {
                 }
             },
             services:   {
-                search:           {module: es.Client, args: ['%elasticsearch%']},
-                'manager.invite': {
-                    module: InviteManager,
-                    args:   ['@dispatcher', '@client', '@logger']
-                },
-                'manager.server': {
-                    module: ServerManager,
-                    args:   ['@dispatcher', '@client', '@logger']
-                },
-                'manager.bot':    {
-                    module: BotManager,
-                    args:   ['@dispatcher', '@client', '@logger', '@helper.channel', '@helper.ignore']
-                }
+                search:                   {module: es.Client, args: ['%elasticsearch%']},
+                'checker.invite':         {module: InviteChecker, args: ['@client', '@logger']},
+                'listener.server':        {module: ServerListener, args: ['@client', '@logger']},
+                'factory.manager.server': {module: ServerManagerFactory, args: ['@container']}
             }
         };
     }
