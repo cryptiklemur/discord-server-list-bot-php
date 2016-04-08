@@ -40,6 +40,7 @@ class Bot extends BaseBot {
     onReady() {
         super.onReady();
 
+        this.client = this.container.get('client');
         this.client.on('raw', (message) => this.logger.debug(message));
 
 
