@@ -15,7 +15,7 @@ const Server = new Schema({
     icon:         {type: String},
     region:       {type: String},
     private:      {type: Boolean, default: false},
-    bid:          {type: Number, default: 0},
+    billing:      {bid: {type: Number, default: 0}},
     premium:      {type: Boolean, default: false},
     customUrl:    {type: String, index: {unique: true, sparse: true}},
     description:  {type: String},

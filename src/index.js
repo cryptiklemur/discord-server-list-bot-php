@@ -1,12 +1,13 @@
 'use strict';
 
-const pkg           = require('../package');
-const Bot           = require('./Bot');
-const InviteManager = require('./Manager/InviteManager');
-const ServerManager = require('./Manager/ServerManager');
-const BotManager    = require('./Manager/BotManager');
-const es            = require('elasticsearch');
-const env           = process.env;
+const pkg                     = require('../package'),
+      Bot                     = require('./Bot'),
+      InviteChecker           = require('./Checker/InviteChecker'),
+      ServerListener          = require('./Listener/ServerListener'),
+      ServerManagerRepository = require('./Repository/ServerManagerRepository'),
+      ServerManagerFactory    = require('./Factory/Manager/ServerManagerFactory'),
+      es                      = require('elasticsearch'),
+      env                     = process.env;
 
 let options = {
     admin_id:      env.DISCORD_ADMIN_ID,
@@ -27,25 +28,24 @@ let options = {
     container:     (Bot) => {
         return {
             parameters: {
+                oauth_id:      env.DISCORD_OAUTH_ID,
                 elasticsearch: {
-                    host: env.DISCORD_ELASTICSEARCH_HOST,
-                    port: env.DISCORD_ELASTICSEARCH_PORT
+                    host: env.DISCORD_ELASTICSEARCH_HOST + ":" + env.DISCORD_ELASTICSEARCH_PORT,
+                    log:  ['error']
                 }
             },
             services:   {
-                search:           {module: es.Client, args: ['%elasticsearch%']},
-                'manager.invite': {
-                    module: InviteManager,
-                    args:   ['@dispatcher', '@client', '@logger']
+                search:                      {module: es.Client, args: ['%elasticsearch%']},
+                'checker.invite':            {
+                    module: InviteChecker,
+                    args:   ['@client', '@repository.server_manager', '@logger']
                 },
-                'manager.server': {
-                    module: ServerManager,
-                    args:   ['@dispatcher', '@client', '@logger']
+                'listener.server':           {
+                    module: ServerListener,
+                    args:   ['@client', '@repository.server_manager', '@logger']
                 },
-                'manager.bot':    {
-                    module: BotManager,
-                    args:   ['@dispatcher', '@client', '@logger', '@helper.channel', '@helper.ignore']
-                }
+                'repository.server_manager': {module: ServerManagerRepository},
+                'factory.manager.server':    {module: ServerManagerFactory, args: ['@container']}
             }
         };
     }
