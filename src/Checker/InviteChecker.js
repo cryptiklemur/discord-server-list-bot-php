@@ -1,31 +1,61 @@
 const ArrayIterator = require('../ArrayIterator'),
+      InviteUpdate  = require('../Model/InviteUpdate'),
+      _             = require('lodash'),
       EventEmitter  = require('events').EventEmitter;
 
 const WAIT_TIME = 5;
 
 class InviteChecker extends EventEmitter {
-    constructor(client, logger) {
+    constructor(client, repository, logger) {
         super();
 
-        this.client = client;
-        this.logger = logger;
+        this.client     = client;
+        this.repository = repository;
+        this.logger     = logger;
 
-        this.serverManagers = new ArrayIterator();
+        this.serverManagers = new ArrayIterator(this.repository.items);
+        this.repository.on('add', this.addServerManager.bind(this));
+        this.repository.on('remove', this.removeServerManager.bind(this));
 
         this.on('start', this.checkNextInvite.bind(this));
-        this.on('end', () => this.emit('start'));
+        this.on('end', () => setTimeout(() => this.emit('start'), 1));
 
         // Start the invite checker after 5 minutes
-        setTimeout(() => this.emit('start'), 5 * 60 * 1000);
+        //setTimeout(() => this.emit('start'), 5 * 60 * 1000);
+        setTimeout(
+            () => {
+                this.emit('start')
+            }
+            , 5000
+        );
     }
 
     addServerManager(serverManager) {
         this.serverManagers.push(serverManager);
     }
 
+    removeServerManager(serverManager) {
+        let managers = this.serverManagers.all();
+        for (let index in managers) {
+            if (!managers.hasOwnProperty(index)) {
+                continue;
+            }
+
+            if (managers[index].clientServer.id === serverManager.clientServer.id) {
+                managers.splice(index, 1);
+
+                break;
+            }
+        }
+
+        this.serverManagers = new ArrayIterator(managers);
+    }
+
     checkNextInvite() {
         this.serverManagers.next();
         if (this.serverManagers.done()) {
+            this.serverManagers.reset();
+
             return this.emit('end');
         }
 
@@ -42,7 +72,7 @@ class InviteChecker extends EventEmitter {
         }
 
         //this.logger.debug(
-        //    `Server Invite Update: [${this.servers.index()}/${this.servers.all().length - 1}] - ${clientServer.id} updating invite.`
+        //    `Server Invite Update: [${this.serverManagers.currentIndex() + 1}/${this.serverManagers.length}] - ${clientServer.name} updating invite.`
         //);
 
         this.updateServer(current)
@@ -57,24 +87,25 @@ class InviteChecker extends EventEmitter {
 
         return new Promise((resolve, reject) => {
             this.client.getInvite(databaseServer.inviteCode)
-                .then(invite => resolve)
+                .then(resolve)
                 .catch(error => {
-                    this.logger.debug("Server's invite code is invalid or expired.");
-
                     return this.getNewInviteCode(
                         clientServer,
                         (invite) => {
-                            this.logger.debug(databaseServer.name + "'s invite code successfully updated");
                             databaseServer.inviteCode = invite.code;
                             databaseServer.enabled    = true;
 
                             serverManager.updateServer().then(resolve).catch(reject);
                         },
                         () => {
-                            databaseServer.inviteCode = undefined;
-                            databaseServer.enabled    = false;
+                            if (databaseServer.inviteCode !== undefined && databaseServer.enabled !== false) {
+                                databaseServer.inviteCode = undefined;
+                                databaseServer.enabled    = false;
 
-                            serverManager.updateServer().then(resolve).catch(reject);
+                                return serverManager.updateServer().then(resolve).catch(reject);
+                            }
+
+                            resolve();
                         }
                     );
                 });
@@ -83,7 +114,7 @@ class InviteChecker extends EventEmitter {
 
     getNewInviteCode(server, successCallback, unchangedCallback) {
         this.client.getInvites(server)
-            .catch(this.logger.error)
+            .catch(unchangedCallback)
             .then(invites => {
                 if (!invites || invites.length < 1) {
                     if (!server.defaultChannel) {
@@ -91,14 +122,16 @@ class InviteChecker extends EventEmitter {
                     }
 
                     return this.client.createInvite(server.defaultChannel.id, {temporary: false})
-                        .catch(() => this.checkInviteUpdate(server, unchangedCallback))
-                        .then(invite => {
-                            if (!invite) {
-                                return this.checkInviteUpdate(server, unchangedCallback);
-                            }
+                        .then(
+                            invite => {
+                                if (!invite) {
+                                    return this.checkInviteUpdate(server, unchangedCallback);
+                                }
 
-                            successCallback(invite);
-                        });
+                                successCallback(invite);
+                            },
+                            () => this.checkInviteUpdate(server, unchangedCallback)
+                        );
                 }
 
                 let invite = this.getBestInvite(invites);
@@ -133,7 +166,8 @@ class InviteChecker extends EventEmitter {
     }
 
     checkInviteUpdate(server, callback) {
-        callback = typeof callback === 'function' ? callback : () => {};
+        callback = typeof callback === 'function' ? callback : () => {
+        };
         if (server.inviteCode) {
             return;
         }

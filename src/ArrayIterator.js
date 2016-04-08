@@ -1,4 +1,6 @@
 class ArrayIterator {
+    get length() { return this.array.length; }
+
     constructor(array) {
         this.array = array || [];
         this.index = -1;
@@ -8,12 +10,16 @@ class ArrayIterator {
         return this.array[this.index];
     }
 
+    currentIndex() {
+        return this.index;
+    }
+
     done() {
         return this.index >= this.array.length;
     }
 
-    index() {
-        return this.index;
+    reset() {
+        this.index = -1;
     }
 
     prev() {

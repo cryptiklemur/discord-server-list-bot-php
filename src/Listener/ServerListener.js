@@ -1,101 +1,93 @@
-const EventEmitter  = require('events').EventEmitter;
+const EventEmitter = require('events').EventEmitter;
 
 class ServerListener extends EventEmitter {
-    constructor(client, logger) {
+    constructor(client, repository, logger) {
         super();
 
-        this.client = client;
-        this.logger = logger;
-
-        this.serverManagers = [];
-    }
-
-    addServerManager(serverManager) {
-        this.serverManagers.push(serverManager);
+        this.client     = client;
+        this.repository = repository;
+        this.logger     = logger;
 
         this.client.on('message', (message) => {
-            if (this.serversEqual(serverManager, message.channel.server)) {
-                serverManager.emit('message', message);
+            if (!message.channel.server) {
+                return;
             }
+
+            this.serverEmit(message.channel.server, 'messageCreated', message);
         });
 
         this.client.on('messageDeleted', (message, channel) => {
-            if (this.serversEqual(serverManager, channel.server)) {
-                serverManager.emit('message', message);
+            if (!message || !message.channel || !message.channel.server) {
+                return;
             }
+
+            this.serverEmit(channel.server, 'messageDeleted', message, channel);
         });
 
         this.client.on('serverDeleted', (server) => {
-            if (this.serversEqual(serverManager, server)) {
-                serverManager.emit('deleted');
-            }
+            this.serverEmit(server, 'serverDeleted', server);
         });
 
         this.client.on('serverUpdated', (beforeChange, afterChange) => {
-            if (this.serversEqual(serverManager, beforeChange)) {
-                serverManager.emit('updated', beforeChange, afterChange);
-            }
+            this.serverEmit(beforeChange, 'serverUpdated', beforeChange, afterChange);
         });
 
         this.client.on('channelCreated', (channel) => {
-            if (this.serversEqual(serverManager, channel.server)) {
-                serverManager.emit('channelCreated', server);
-            }
+            this.serverEmit(channel.server, 'channelCreated', channel);
         });
 
         this.client.on('channelDeleted', (channel) => {
-            if (this.serversEqual(serverManager, channel.server)) {
-                serverManager.emit('channelDeleted', server);
-            }
+            this.serverEmit(channel.server, 'channelDeleted', channel);
         });
 
         this.client.on('channelUpdated', (beforeChange, afterChange) => {
-            if (this.serversEqual(serverManager, beforeChange)) {
-                serverManager.emit('channelUpdated', beforeChange, afterChange);
-            }
+            this.serverEmit(beforeChange.server, 'channelUpdated', beforeChange, afterChange);
         });
 
         this.client.on('serverRoleCreated', (role) => {
-            if (this.serversEqual(serverManager, role.server)) {
-                serverManager.emit('roleCreated', role);
-            }
+            this.serverEmit(role.server, 'roleCreated', role);
         });
 
         this.client.on('serverRoleDeleted', (role) => {
-            if (this.serversEqual(serverManager, role.server)) {
-                serverManager.emit('roleDeleted', role);
-            }
+            this.serverEmit(role.server, 'roleDeleted', role);
         });
 
         this.client.on('serverRoleUpdated', (beforeChange, afterChange) => {
-            if (this.serversEqual(serverManager, beforeChange.server)) {
-                serverManager.emit('roleUpdated', beforeChange, afterChange);
-            }
+            this.serverEmit(beforeChange.server, 'roleUpdated', beforeChange, afterChange);
         });
 
         this.client.on('serverNewMember', (server, user) => {
-            if (this.serversEqual(serverManager, server)) {
-                serverManager.emit('newMember', user);
-            }
+            this.serverEmit(server, 'memberCreated', user);
         });
 
         this.client.on('serverMemberRemoved', (server, user) => {
-            if (this.serversEqual(serverManager, server)) {
-                serverManager.emit('memberRemoved', user);
-            }
+            this.serverEmit(server, 'memberRemoved', user);
         });
 
         this.client.on('serverMemberUpdated', (server, user) => {
-            if (this.serversEqual(serverManager, server)) {
-                serverManager.emit('memberUpdated', user);
-            }
+            this.serverEmit(server, 'memberUpdated', user);
         });
 
         this.client.on('presence', (beforeChange, afterChange) => {
-            if (serverManager.clientServer.members.find(user => user.id === beforeChange)) {
-                serverManager.emit('memberPresence', beforeChange, afterChange);
+            let servers = this.client.servers.filter(server => server.members.find(user => user.id === beforeChange.id));
+
+            for (let index in servers) {
+                if (servers.hasOwnProperty(index)) {
+                    this.serverEmit(servers[index], 'memberPresence', beforeChange, afterChange);
+                }
             }
         });
+    }
+
+    serverEmit(server, event, ...args) {
+        let serverManager = this.repository.find(manager => this.serversEqual(manager, server));
+        if (!serverManager) {
+            return;
+        }
+
+        //this.logger.debug(`Emitting ${event} to ${serverManager.clientServer.name}`);
+        args.unshift(event);
+        serverManager.emit.apply(serverManager, args);
     }
 
     serversEqual(serverManager, server) {

@@ -3,7 +3,7 @@ const Server          = require('../Model/Server');
 
 class ControlPanelCommand extends AbstractCommand {
     static get name() {
-        return 'controlpanel';
+        return 'cp';
     }
 
     static get description() {

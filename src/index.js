@@ -1,12 +1,13 @@
 'use strict';
 
-const pkg                  = require('../package'),
-      Bot                  = require('./Bot'),
-      InviteChecker        = require('./Checker/InviteChecker'),
-      ServerListener       = require('./Listener/ServerListener'),
-      ServerManagerFactory = require('./Factory/Manager/ServerManagerFactory'),
-      es                   = require('elasticsearch'),
-      env                  = process.env;
+const pkg                     = require('../package'),
+      Bot                     = require('./Bot'),
+      InviteChecker           = require('./Checker/InviteChecker'),
+      ServerListener          = require('./Listener/ServerListener'),
+      ServerManagerRepository = require('./Repository/ServerManagerRepository'),
+      ServerManagerFactory    = require('./Factory/Manager/ServerManagerFactory'),
+      es                      = require('elasticsearch'),
+      env                     = process.env;
 
 let options = {
     admin_id:      env.DISCORD_ADMIN_ID,
@@ -27,16 +28,24 @@ let options = {
     container:     (Bot) => {
         return {
             parameters: {
+                oauth_id:      env.DISCORD_OAUTH_ID,
                 elasticsearch: {
-                    host: env.DISCORD_ELASTICSEARCH_HOST,
-                    port: env.DISCORD_ELASTICSEARCH_PORT
+                    host: env.DISCORD_ELASTICSEARCH_HOST + ":" + env.DISCORD_ELASTICSEARCH_PORT,
+                    log:  ['error']
                 }
             },
             services:   {
-                search:                   {module: es.Client, args: ['%elasticsearch%']},
-                'checker.invite':         {module: InviteChecker, args: ['@client', '@logger']},
-                'listener.server':        {module: ServerListener, args: ['@client', '@logger']},
-                'factory.manager.server': {module: ServerManagerFactory, args: ['@container']}
+                search:                      {module: es.Client, args: ['%elasticsearch%']},
+                'checker.invite':            {
+                    module: InviteChecker,
+                    args:   ['@client', '@repository.server_manager', '@logger']
+                },
+                'listener.server':           {
+                    module: ServerListener,
+                    args:   ['@client', '@repository.server_manager', '@logger']
+                },
+                'repository.server_manager': {module: ServerManagerRepository},
+                'factory.manager.server':    {module: ServerManagerFactory, args: ['@container']}
             }
         };
     }
