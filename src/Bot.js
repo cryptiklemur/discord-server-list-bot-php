@@ -41,14 +41,13 @@ class Bot extends BaseBot {
         super.onReady();
 
         this.client = this.container.get('client');
-        this.client.on('raw', (message) => this.logger.debug(message));
-
+        //this.client.on('raw', (message) => this.logger.debug(message));
 
         // Send to carbon the server counts after 5 minutes, then throttle so it only sends once every 5 minutes
         this.sendToCarbon = _.throttle(this.sendToCarbon.bind(this), 5 * 60 * 1000);
 
-        //this.client.on('serverCreated', this.container.get('factory.manager.server').create);
-        //this.client.servers.forEach(this.container.get('factory.manager.server').create);
+        this.client.on('serverCreated', this.container.get('factory.manager.server').create);
+        this.client.servers.forEach(this.container.get('factory.manager.server').create);
         this.sendToCarbon();
     }
 
