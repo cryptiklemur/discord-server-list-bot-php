@@ -96,9 +96,9 @@ class ServerManager extends EventEmitter {
                 }
 
                 if (!this.databaseServer.inviteCode) {
-                    this.elastic.delete({index: 'app', type: 'Server', id: this.databaseServer.id});
-                    
-                    return resolve();
+                    //this.elastic.delete({index: 'app', type: 'Server', id: this.databaseServer.id});
+
+                    //return resolve();
                 }
 
                 let data = {
