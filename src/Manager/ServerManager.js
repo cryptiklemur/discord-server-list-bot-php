@@ -79,7 +79,7 @@ class ServerManager extends EventEmitter {
                 });
             }
 
-            let owner = this.clientServer.owner === null ? null : this.clientServer.owner.id;
+            let owner = this.clientServer.owner === null ? 0 : this.clientServer.owner.id;
 
             this.databaseServer.name         = this.clientServer.name;
             this.databaseServer.region       = this.clientServer.region;
@@ -93,6 +93,12 @@ class ServerManager extends EventEmitter {
             this.databaseServer.save(error => {
                 if (error) {
                     return reject(new Error(error));
+                }
+
+                if (!this.databaseServer.inviteCode) {
+                    this.elastic.delete({index: 'app', type: 'Server', id: this.databaseServer.id});
+                    
+                    return resolve();
                 }
 
                 let data = {
@@ -124,7 +130,7 @@ class ServerManager extends EventEmitter {
                             "doc":           data
                         }
                     })
-                    .catch(reject)
+                    .catch(this.logger.error)
                     .then(resolve);
 
             });
