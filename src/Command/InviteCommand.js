@@ -23,7 +23,7 @@ class InviteCommand extends AbstractCommand {
         this.responds(/^join ?(https:\/\/discord\.gg\/([A-Za-z0-9-]+))?$/g, matches => {
             this.reply(`To add this bot, click the following link:
 
-    https://discordapp.com/oauth2/authorize?&client_id=${this.container.getParameter('oauth_id')}&scope=bot\n`);
+    https://discordapp.com/oauth2/authorize?&client_id=${this.container.getParameter('oauth_id')}&scope=bot&permissions=0000001\n`);
         });
 
         this.hears(/https:\/\/discord\.gg\/([A-Za-z0-9-]+)/g, (matches) => {
