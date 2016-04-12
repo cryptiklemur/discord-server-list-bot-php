@@ -12,6 +12,8 @@ class ServerManager extends EventEmitter {
         this.elastic    = container.get('search');
         this.logger     = container.get('logger');
 
+        this.updateServer = _.debounce(this.updateServer.bind(this), 5000);
+
         this.clientServer = server;
         Server.findOne({identifier: server.id}, (error, databaseServer) => {
             if (error) {
@@ -43,19 +45,19 @@ class ServerManager extends EventEmitter {
             //this.logger.debug(`${message.author.name} - ${message.content}`);
         });
         this.on('serverDeleted', this.onServerDeleted.bind(this));
-        this.on('serverUpdated', this.updateServer.bind(this));
-        this.on('channelCreated', this.updateServer.bind(this));
-        this.on('channelUpdated', this.updateServer.bind(this));
-        this.on('channelDeleted', this.updateServer.bind(this));
-        this.on('memberCreated', this.updateServer.bind(this));
-        this.on('memberDeleted', this.updateServer.bind(this));
-        this.on('memberUpdated', this.updateServer.bind(this));
+        this.on('serverUpdated', this.updateServer);
+        this.on('channelCreated', this.updateServer);
+        this.on('channelUpdated', this.updateServer);
+        this.on('channelDeleted', this.updateServer);
+        this.on('memberCreated', this.updateServer);
+        this.on('memberDeleted', this.updateServer);
+        this.on('memberUpdated', this.updateServer);
     }
 
     onServerDeleted() {
         this.logger.debug("Deleting server: " + this.clientServer.id + ' - ' + this.clientServer.name);
         this.databaseServer.remove(() => {
-            this.container.get('repository.server_manager').remove(this);
+                this.container.get('repository.server_manager').remove(this);
         });
     }
 
@@ -118,15 +120,24 @@ class ServerManager extends EventEmitter {
                     if (exists) {
                         if (!data.enabled || data.private || !data.inviteCode) {
                             return this.elastic.delete({index: 'app', type: 'Server', id: data.id})
-                                .then(resolve).catch(this.logger.error);
+                                .then(resolve).catch(error => {
+                                    this.logger.error('Error Deleting Item: ' + data.id);
+                                    this.logger.error(error);
+                                });
                         }
 
                         return this.elastic.update({index: 'app', type: 'Server', id: data.id, body: {doc: data}})
-                            .then(resolve).catch(this.logger.error);
+                            .then(resolve).catch(error => {
+                                this.logger.error('Error Updating Item: ' + data.id);
+                                this.logger.error(error);
+                            });
                     }
 
                     return this.elastic.create({index: 'app', type: 'Server', id: data.id, body: data})
-                        .then(resolve).catch(this.logger.error);
+                        .then(resolve).catch(error => {
+                            this.logger.error('Error Adding Item: ' + data.id);
+                            this.logger.error(error);
+                        });
                 });
             });
         });
