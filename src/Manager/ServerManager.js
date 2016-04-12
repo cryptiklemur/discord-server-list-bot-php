@@ -123,7 +123,7 @@ class ServerManager extends EventEmitter {
 
                 this.elastic.exists({index: 'app', type: 'Server', id: data.id}, (error, exists) => {
                     if (exists) {
-                        if (!data.enabled || data.private || !data.inviteCode) {
+                        if (!data.enabled || data.private || !data.invite_code) {
                             return this.elastic.delete({index: 'app', type: 'Server', id: data.id})
                                 .then(resolve).catch(error => {
                                     this.logger.error('Error Deleting Item: ' + data.id);
@@ -136,6 +136,10 @@ class ServerManager extends EventEmitter {
                                 this.logger.error('Error Updating Item: ' + data.id);
                                 this.logger.error(error);
                             });
+                    }
+
+                    if (!data.enabled || data.private || !data.invite_code) {
+                        return resolve();
                     }
 
                     return this.elastic.create({index: 'app', type: 'Server', id: data.id, body: data})
