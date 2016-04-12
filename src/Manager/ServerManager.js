@@ -54,7 +54,9 @@ class ServerManager extends EventEmitter {
 
     onServerDeleted() {
         this.logger.debug("Deleting server: " + this.clientServer.id + ' - ' + this.clientServer.name);
-        this.container.get('repository.server_manager').remove(this);
+        this.databaseServer.remove(() => {
+            this.container.get('repository.server_manager').remove(this);
+        });
     }
 
     updateServer() {
@@ -66,7 +68,7 @@ class ServerManager extends EventEmitter {
             }
 
             if (!this.databaseServer) {
-                let databaseServer            = new Server();
+                let databaseServer        = new Server();
                 databaseServer.identifier = this.clientServer.id;
 
                 return databaseServer.save(error => {
@@ -95,12 +97,6 @@ class ServerManager extends EventEmitter {
                     return reject(new Error(error));
                 }
 
-                if (!this.databaseServer.inviteCode) {
-                    //this.elastic.delete({index: 'app', type: 'Server', id: this.databaseServer.id});
-
-                    //return resolve();
-                }
-
                 let data = {
                     "id":            this.databaseServer.id,
                     "identifier":    this.clientServer.id,
@@ -118,21 +114,20 @@ class ServerManager extends EventEmitter {
                     "insert_date":   this.databaseServer.insertDate.toISOString(),
                     "modified_date": this.databaseServer.modifiedDate.toISOString()
                 };
-
-
-                this.elastic
-                    .update({
-                        index: 'app',
-                        type:  'Server',
-                        id:    this.databaseServer.id,
-                        body:  {
-                            "doc_as_upsert": true,
-                            "doc":           data
+                this.elastic.exists({index: 'app', type: 'Server', id: data.id}, (error, exists) => {
+                    if (exists) {
+                        if (!data.enabled || data.private || !data.inviteCode) {
+                            return this.elastic.delete({index: 'app', type: 'Server', id: data.id})
+                                .then(resolve).catch(this.logger.error);
                         }
-                    })
-                    .catch(this.logger.error)
-                    .then(resolve);
 
+                        return this.elastic.update({index: 'app', type: 'Server', id: data.id, body: {doc: data}})
+                            .then(resolve).catch(this.logger.error);
+                    }
+
+                    return this.elastic.create({index: 'app', type: 'Server', id: data.id, body: data})
+                        .then(resolve).catch(this.logger.error);
+                });
             });
         });
     }
