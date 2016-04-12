@@ -16,7 +16,7 @@ class ServerManagerFactory {
             throw new Error("Server already exists: " + server.id + ' - ' + server.name);
         }
 
-        this.container.get('logger').debug("Creating server manager for: " + server.name);
+        //this.container.get('logger').debug("Creating server manager for: " + server.name);
 
         let manager = new ServerManager(this.container, server);
 

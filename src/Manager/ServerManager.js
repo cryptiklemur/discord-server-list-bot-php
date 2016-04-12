@@ -62,7 +62,7 @@ class ServerManager extends EventEmitter {
     }
 
     updateServer() {
-        this.logger.debug("Updating server: " + this.clientServer.id + ' - ' + this.clientServer.name);
+        //this.logger.debug("Updating server: " + this.clientServer.id + ' - ' + this.clientServer.name);
 
         return new Promise((resolve, reject) => {
             if (!this.clientServer || !this.clientServer.name) {
@@ -117,7 +117,7 @@ class ServerManager extends EventEmitter {
                     "modified_date": this.databaseServer.modifiedDate.toISOString()
                 };
 
-                if (!data.owner) {
+                if (data.owner === null) {
                     delete data.owner;
                 }
 
