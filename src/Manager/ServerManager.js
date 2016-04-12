@@ -116,6 +116,11 @@ class ServerManager extends EventEmitter {
                     "insert_date":   this.databaseServer.insertDate.toISOString(),
                     "modified_date": this.databaseServer.modifiedDate.toISOString()
                 };
+
+                if (!data.owner) {
+                    delete data.owner;
+                }
+
                 this.elastic.exists({index: 'app', type: 'Server', id: data.id}, (error, exists) => {
                     if (exists) {
                         if (!data.enabled || data.private || !data.inviteCode) {
