@@ -3,11 +3,6 @@
 const mongoose = require('mongoose'),
       Schema   = mongoose.Schema;
 
-const Owner = new Schema({
-    id:   {type: String},
-    name: {type: String}
-});
-
 const Server = new Schema({
     name:         {type: String},
     identifier:   {type: String, index: {unique: true}},
@@ -24,7 +19,7 @@ const Server = new Schema({
     insertDate:   {type: Date, default: Date.now()},
     modifiedDate: {type: Date, default: Date.now()},
     enabled:      {type: Boolean, default: true},
-    owner:        Owner
+    owner:        {type: String}
 });
 
 module.exports = mongoose.model('Server', Server, 'servers');

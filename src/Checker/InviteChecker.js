@@ -22,12 +22,7 @@ class InviteChecker extends EventEmitter {
 
         // Start the invite checker after 5 minutes
         //setTimeout(() => this.emit('start'), 5 * 60 * 1000);
-        setTimeout(
-            () => {
-                this.emit('start')
-            }
-            , 5000
-        );
+        setTimeout(() => {this.logger.info("Starting invite checker"); this.emit('start');}, 30000);
     }
 
     addServerManager(serverManager) {
