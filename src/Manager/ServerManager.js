@@ -12,7 +12,7 @@ class ServerManager extends EventEmitter {
         this.elastic    = container.get('search');
         this.logger     = container.get('logger');
 
-        this.updateServer = _.debounce(this.updateServer.bind(this), 5000);
+        this.updateServer = _.throttle(this.updateServer.bind(this), 5 * 60000);
 
         this.clientServer = server;
         Server.findOne({identifier: server.id}, (error, databaseServer) => {
@@ -35,7 +35,9 @@ class ServerManager extends EventEmitter {
             }
 
             this.databaseServer = databaseServer;
-            this.updateServer();
+
+            let rand = Math.floor(Math.random() * (15 * 60 * 1000)) + (60 * 1000);
+            setTimeout(() => this.updateServer(), rand);
 
             this.emit('loaded', this);
         });
