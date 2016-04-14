@@ -72,16 +72,24 @@ class ServerManager extends EventEmitter {
             }
 
             if (!this.databaseServer) {
-                let databaseServer        = new Server();
-                databaseServer.identifier = this.clientServer.id;
-
-                return databaseServer.save(error => {
+                return Server.findOne({identifier: this.clientServer.id}, (error, databaseServer) => {
                     if (error) {
                         return this.logger.error(error);
                     }
 
-                    this.databaseServer = databaseServer;
-                    this.updateServer().then(resolve).catch(reject);
+                    if (!databaseServer) {
+                        databaseServer            = new Server();
+                        databaseServer.identifier = this.clientServer.id;
+
+                        return databaseServer.save(error => {
+                            if (error) {
+                                return this.logger.error(error);
+                            }
+
+                            this.databaseServer = databaseServer;
+                            this.updateServer().then(resolve).catch(reject);
+                        });
+                    }
                 });
             }
 
