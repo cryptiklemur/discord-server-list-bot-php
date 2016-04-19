@@ -132,6 +132,13 @@ class ServerManager extends EventEmitter {
                 }
 
                 this.elastic.exists({index: 'app', type: 'Server', id: data.id}, (error, exists) => {
+                    if (error) {
+                        this.logger.error('Error Adding Item: ' + data.id);
+                        this.logger.error(error);
+
+                        return;
+                    }
+
                     if (exists) {
                         if (!data.enabled || data.private || !data.invite_code) {
                             return this.elastic.delete({index: 'app', type: 'Server', id: data.id})

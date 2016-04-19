@@ -1,16 +1,29 @@
 const AbstractCommand = require('discord-bot-base').AbstractCommand;
-const _ = require('lodash');
-const Server = require('../Model/Server');
+const _               = require('lodash');
+const Server          = require('../Model/Server');
 
 class UpdateCommand extends AbstractCommand {
-    static get name() { return 'update'; }
+    static get name() {
+        return 'update';
+    }
 
-    static get description() { return 'Update a server id with a new invite code'}
+    static get description() {
+        return 'Update a server id with a new invite code'
+    }
 
     handle() {
-        if (!this.isPm() && this.server.id !== '115390342735331332') {
-            return false
-        }
+        this.responds(/^update (\d+)$/, matches => {
+            if (!this.isAdmin()) {
+                return;
+            }
+
+            let repo    = this.container.get('repository.server_manager'),
+                id      = matches[1],
+                manager = repo.find(manager => manager.clientServer.id === id);
+
+            manager.emit('serverUpdated');
+            this.reply("Queuing update.");
+        });
 
         return this.responds(
             /^update (\d+) (?:<?)(?:(?:https?:\/\/)?(?:discord.gg|discordapp.com\/invite)\/)?([A-Za-z0-9]+)(?:>?)$/gmi,
@@ -54,6 +67,11 @@ class UpdateCommand extends AbstractCommand {
                         }
 
                         this.reply("Updating " + _.trim(server.name) + " with new invite code: " + matches[2]);
+                        let repo    = this.container.get('repository.server_manager'),
+                            id      = matches[1],
+                            manager = repo.find(manager => manager.clientServer.id === id);
+
+                        manager.emit('serverUpdated');
                     });
                 });
             });
