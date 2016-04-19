@@ -64,7 +64,7 @@ class ServerManager extends EventEmitter {
     }
 
     updateServer() {
-        //this.logger.debug("Updating server: " + this.clientServer.id + ' - ' + this.clientServer.name);
+        this.logger.debug("Updating server: " + this.clientServer.id + ' - ' + this.clientServer.name);
 
         return new Promise((resolve, reject) => {
             if (!this.clientServer || !this.clientServer.name) {
