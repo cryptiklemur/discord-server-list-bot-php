@@ -27,6 +27,8 @@ class InviteChecker extends EventEmitter {
 
     addServerManager(serverManager) {
         this.serverManagers.push(serverManager);
+
+        setTimeout(() => this.updateServer(serverManager), 10000);
     }
 
     removeServerManager(serverManager) {
