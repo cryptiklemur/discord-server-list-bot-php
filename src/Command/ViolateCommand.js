@@ -48,7 +48,7 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                         let owner = this.client.users.get('id', dbServer.owner.id);
                         this.sendMessage(owner, message);
 
-                        let reply = `Sent owner of ${dbServer.name} (${owner.name}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
+                        let reply = `Sent owner of ${dbServer.name} (${owner}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
                         this.logger.info(reply);
                         this.sendMessage(this.client.admin, reply);
                     });
