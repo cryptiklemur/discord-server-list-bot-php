@@ -46,11 +46,17 @@ If you would like to appeal this, please tweet \`@discservs\` or find \`Aaron\` 
                         }
 
                         let owner = this.client.users.get('id', dbServer.owner.id);
-                        this.sendMessage(owner, message);
 
-                        let reply = `Sent owner of ${dbServer.name} (${owner}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
-                        this.logger.info(reply);
-                        this.sendMessage(this.client.admin, reply);
+                        try {
+                            this.sendMessage(owner, message);
+                            let reply = `Sent owner of ${dbServer.name} (${owner}) the following message: \n\n\`\`\`\n${message}\n\`\`\``;
+                            this.logger.info(reply);
+                            this.sendMessage(this.client.admin, reply);
+                        } catch (e) {
+                            this.sendMessage(this.client.admin, 'Failed sending a message to the owner of that server.');
+                            this.logger.error(e);
+                        }
+
                     });
                 });
             });
