@@ -22,7 +22,7 @@ class InviteChecker extends EventEmitter {
 
         // Start the invite checker after 5 minutes
         //setTimeout(() => this.emit('start'), 5 * 60 * 1000);
-        setTimeout(() => {this.logger.info("Starting invite checker"); this.emit('start');}, 30000);
+        //setTimeout(() => {this.logger.info("Starting invite checker"); this.emit('start');}, 30000);
     }
 
     addServerManager(serverManager) {
@@ -66,9 +66,9 @@ class InviteChecker extends EventEmitter {
             return setTimeout(this.checkNextInvite.bind(this), 1);
         }
 
-        //this.logger.debug(
-        //    `Server Invite Update: [${this.serverManagers.currentIndex() + 1}/${this.serverManagers.length}] - ${clientServer.name} updating invite.`
-        //);
+        this.logger.debug(
+            `Server Invite Update: [${this.serverManagers.currentIndex() + 1}/${this.serverManagers.length}] - ${clientServer.name} updating invite.`
+        );
 
         this.updateServer(current)
             .then(() => setTimeout(this.checkNextInvite.bind(this), 1000 * WAIT_TIME))
