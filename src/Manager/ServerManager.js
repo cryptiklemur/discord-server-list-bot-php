@@ -30,16 +30,20 @@ class ServerManager extends EventEmitter {
                     }
 
                     this.databaseServer = databaseServer;
-                    this.updateServer()
+                    this.updateServer();
+                    this.emit('loaded', this);
                 });
             }
 
             this.databaseServer = databaseServer;
 
             let rand = Math.floor(Math.random() * (15 * 60 * 1000)) + (60 * 1000);
-            setTimeout(() => this.updateServer(), rand);
-
-            this.emit('loaded', this);
+            setTimeout(() => {
+                    this.updateServer();
+                    this.emit('loaded', this);
+                },
+                rand
+            );
         });
 
         this.on('messageCreated', message => {
@@ -59,7 +63,7 @@ class ServerManager extends EventEmitter {
     onServerDeleted() {
         this.logger.debug("Deleting server: " + this.clientServer.id + ' - ' + this.clientServer.name);
         this.databaseServer.remove(() => {
-                this.container.get('repository.server_manager').remove(this);
+            this.container.get('repository.server_manager').remove(this);
         });
     }
 
