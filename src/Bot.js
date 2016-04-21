@@ -46,8 +46,8 @@ class Bot extends BaseBot {
         // Send to carbon the server counts after 5 minutes, then throttle so it only sends once every 5 minutes
         this.sendToCarbon = _.throttle(this.sendToCarbon.bind(this), 5 * 60 * 1000);
 
-        this.client.on('serverCreated', () => {
-            let manager = this.container.get('factory.manager.server').create();
+        this.client.on('serverCreated', server => {
+            let manager = this.container.get('factory.manager.server').create(server);
 
             manager.on('loaded', () => {
                 //this.logger.debug("Server added, checking invite: " + manager.clientServer.name);
