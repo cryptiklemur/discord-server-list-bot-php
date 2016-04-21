@@ -50,8 +50,8 @@ class Bot extends BaseBot {
             let manager = this.container.get('factory.manager.server').create();
 
             manager.on('loaded', () => {
-                this.logger.debug("Server added, checking invite: " + manager.clientServer.name);
-                this.container.get('checker.invite').updateServer(manager);
+                //this.logger.debug("Server added, checking invite: " + manager.clientServer.name);
+                //this.container.get('checker.invite').updateServer(manager);
             });
         });
         this.client.servers.forEach(this.container.get('factory.manager.server').create);
